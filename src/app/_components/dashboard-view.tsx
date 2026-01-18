@@ -3,20 +3,19 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Award, BookOpen, Clock, Flame } from "lucide-react";
 import { useLearning } from "@/context/learning-context";
 import LearningList from "@/components/learning/list";
-import type { ViewState } from "@/types";
+import type { DashboardStats } from "@/types";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useState } from "react";
 
 interface Props {
   user: any;
-  stats: any;
-  categories: any[];
-  setView: (view: ViewState) => void;
-  onDeleteLog: (id: string) => void;
 }
 
-const DashboardView = ({ user, stats, setView, categories, onDeleteLog }: Props) => {
+const DashboardView = ({ user }: Props) => {
   const { items } = useLearning()
 
+  const [stats, _setStats] = useState<DashboardStats>({ currentStreak: 0, todayHours: 0, totalHours: 0, totalLogs: 0, level: 1 });
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-between items-end">
@@ -100,17 +99,20 @@ const DashboardView = ({ user, stats, setView, categories, onDeleteLog }: Props)
             <h3 className="text-lg font-semibold mb-4 text-primary">Quick Add</h3>
             <Button
               variant='gradient'
-              onClick={() => setView("items")}
+              onClick={() => { }}
               className="w-full"
             >
               + Add Learning
             </Button>
-            <button
-              onClick={() => setView("items")}
+            <Button
+              variant={'outline'}
               className="w-full mt-2"
+              asChild
             >
-              View All ({items.length})
-            </button>
+              <Link href="/items">
+                View All ({items.length})
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
