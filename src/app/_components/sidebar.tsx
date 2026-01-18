@@ -1,6 +1,8 @@
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Views, ViewState } from "@/types";
 import { BarChart2, CheckCircle, FileText, Home, ListTodo, LogOut, Menu, X } from "lucide-react";
 
-type ViewState = 'dashboard' | 'logs' | 'todos' | 'stats' | 'categories' | 'profile';
 //
 // --- Sidebar Component ---
 const Sidebar = ({
@@ -16,14 +18,6 @@ const Sidebar = ({
   setView: (v: ViewState) => void;
   onLogout: () => void
 }) => {
-
-  const menuItems = [
-    { id: 'dashboard', icon: Home, label: 'Dashboard' },
-    { id: 'logs', icon: CheckCircle, label: 'Logs' },
-    { id: 'todos', icon: ListTodo, label: 'To-Do' },
-    { id: 'categories', icon: FileText, label: 'Categories' },
-    { id: 'stats', icon: BarChart2, label: 'Stats' },
-  ];
 
   return (
     <aside className={`bg-white border-r border-gray-200 transition-all duration-300 flex flex-col ${isOpen ? 'w-64' : 'w-20'} h-screen sticky top-0`}>
@@ -42,18 +36,17 @@ const Sidebar = ({
       </div>
 
       <nav className="flex-1 px-4 space-y-2">
-        {menuItems.map((item) => (
-          <button
+        {Views.map((item: ViewState) => (
+          <Button
             key={item.id}
-            onClick={() => { setView(item.id as ViewState) }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${currentView === item.id
-              ? 'bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-md'
-              : 'text-gray-600 hover:bg-gray-50'
-              }`}
+            variant={currentView === item.id ? 'gradient' : "ghost"}
+            onClick={() => { setView(item.id) }}
+            className={cn(`w-full flex items-center gap-3 px-4 py-3 rounded transition-all duration-200`
+            )}
           >
             <item.icon size={20} />
             {isOpen && <span className="font-medium">{item.label}</span>}
-          </button>
+          </Button>
         ))}
       </nav>
 
