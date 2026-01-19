@@ -3,16 +3,16 @@ import { Category, Note } from "./list";
 import { useRouter } from "next/navigation";
 
 interface Props {
-  note: Note,
-  category?: Category,
-  onDelete: (e: React.MouseEvent) => void
+  note: Note;
+  category?: Category;
+  onDelete: (e: React.MouseEvent) => void;
 }
 
 const NoteCard = ({ note, category, onDelete }: Props) => {
-  const router = useRouter()
+  const router = useRouter();
   const onClick = () => {
-    router.push(`/items/${note.id}`)
-  }
+    router.push(`/dashboard/items/${note.id}`);
+  };
 
   return (
     <div
@@ -33,14 +33,17 @@ const NoteCard = ({ note, category, onDelete }: Props) => {
         {category && (
           <span
             className="px-2.5 py-1 rounded-full text-xs font-bold tracking-wide uppercase"
-            style={{ backgroundColor: category.color + '40', color: '#555' }}
+            style={{ backgroundColor: category.color + "40", color: "#555" }}
           >
             {category.name}
           </span>
         )}
         <span className="text-xs text-gray-400 font-medium flex items-center gap-1">
           <Calendar size={12} />
-          {new Date(note.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          {new Date(note.date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          })}
         </span>
       </div>
 
@@ -54,10 +57,19 @@ const NoteCard = ({ note, category, onDelete }: Props) => {
 
       <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
         <div className="flex gap-2 overflow-hidden">
-          {note.tags?.slice(0, 3).map(tag => (
-            <span key={tag} className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-md">#{tag}</span>
+          {note.tags?.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-md"
+            >
+              #{tag}
+            </span>
           ))}
-          {(note.tags?.length || 0) > 3 && <span className="text-[10px] text-gray-400">+{note.tags!.length - 3}</span>}
+          {(note.tags?.length || 0) > 3 && (
+            <span className="text-[10px] text-gray-400">
+              +{note.tags!.length - 3}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
           <Clock size={14} className="text-purple-400" />
@@ -66,6 +78,6 @@ const NoteCard = ({ note, category, onDelete }: Props) => {
       </div>
     </div>
   );
-}
+};
 
 export default NoteCard;

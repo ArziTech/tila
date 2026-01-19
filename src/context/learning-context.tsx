@@ -1,146 +1,157 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
-import { DUMMY_CATEGORIES, DUMMY_LEARNING_ITEMS, DUMMY_PROFILE } from "@/lib/dummy-data"
+import type React from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import {
+  DUMMY_CATEGORIES,
+  DUMMY_LEARNING_ITEMS,
+  DUMMY_PROFILE,
+} from "@/lib/dummy-data";
 
 export interface LearningItem {
-  id: string
-  title: string
-  description: string
+  id: string;
+  title: string;
+  description: string;
   category: Category;
-  topic: string
-  dateAdded: string
-  difficulty: "beginner" | "intermediate" | "advanced"
-  tags: string[]
+  topic: string;
+  dateAdded: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  tags: string[];
 }
 
 export interface Category {
-  id: string
-  name: string
-  color: string
+  id: string;
+  name: string;
+  color: string;
 }
 
 export interface UserProfile {
-  name: string
-  avatar: string
-  totalPoints: number
-  currentStreak: number
-  longestStreak: number
-  learningsSinceReset: number
+  name: string;
+  avatar: string;
+  totalPoints: number;
+  currentStreak: number;
+  longestStreak: number;
+  learningsSinceReset: number;
 }
 
 interface LearningContextType {
-  items: LearningItem[]
-  categories: Category[]
-  profile: UserProfile
-  addItem: (item: Omit<LearningItem, "id" | "dateAdded">) => void
-  deleteItem: (id: string) => void
-  addCategory: (category: Omit<Category, "id">) => void
-  updateProfile: (profile: Partial<UserProfile>) => void
-  getItemsByCategory: (category: string) => LearningItem[]
-  getItemsByTopic: (topic: string) => LearningItem[]
+  items: LearningItem[];
+  categories: Category[];
+  profile: UserProfile;
+  addItem: (item: Omit<LearningItem, "id" | "dateAdded">) => void;
+  deleteItem: (id: string) => void;
+  addCategory: (category: Omit<Category, "id">) => void;
+  updateProfile: (profile: Partial<UserProfile>) => void;
+  getItemsByCategory: (category: string) => LearningItem[];
+  getItemsByTopic: (topic: string) => LearningItem[];
 }
 
-const LearningContext = createContext<LearningContextType | undefined>(undefined)
+const LearningContext = createContext<LearningContextType | undefined>(
+  undefined,
+);
 
-const STORAGE_KEY = "tila-learning-data"
-const CATEGORIES_KEY = "tila-categories"
-const PROFILE_KEY = "tila-profile"
+const STORAGE_KEY = "tila-learning-data";
+const CATEGORIES_KEY = "tila-categories";
+const PROFILE_KEY = "tila-profile";
 
 export function LearningProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<LearningItem[]>([])
-  const [categories, setCategories] = useState<Category[]>(DUMMY_CATEGORIES)
-  const [profile, setProfile] = useState<UserProfile>(DUMMY_PROFILE)
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [items, setItems] = useState<LearningItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>(DUMMY_CATEGORIES);
+  const [profile, setProfile] = useState<UserProfile>(DUMMY_PROFILE);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const savedItems = localStorage.getItem(STORAGE_KEY)
-    const savedCategories = localStorage.getItem(CATEGORIES_KEY)
-    const savedProfile = localStorage.getItem(PROFILE_KEY)
+    const savedItems = localStorage.getItem(STORAGE_KEY);
+    const savedCategories = localStorage.getItem(CATEGORIES_KEY);
+    const savedProfile = localStorage.getItem(PROFILE_KEY);
 
     if (savedItems) {
-      setItems(JSON.parse(savedItems))
+      setItems(JSON.parse(savedItems));
     } else {
-      setItems(DUMMY_LEARNING_ITEMS)
+      setItems(DUMMY_LEARNING_ITEMS);
     }
 
     if (savedCategories) {
-      setCategories(JSON.parse(savedCategories))
+      setCategories(JSON.parse(savedCategories));
     } else {
-      setCategories(DUMMY_CATEGORIES)
+      setCategories(DUMMY_CATEGORIES);
     }
 
     if (savedProfile) {
-      setProfile(JSON.parse(savedProfile))
+      setProfile(JSON.parse(savedProfile));
     } else {
-      setProfile(DUMMY_PROFILE)
+      setProfile(DUMMY_PROFILE);
     }
 
-    setIsLoaded(true)
-  }, [])
+    setIsLoaded(true);
+  }, []);
 
   // Save items to localStorage
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     }
-  }, [items, isLoaded])
+  }, [items, isLoaded]);
 
   // Save categories to localStorage
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories))
+      localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
     }
-  }, [categories, isLoaded])
+  }, [categories, isLoaded]);
 
   // Save profile to localStorage
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile))
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
     }
-  }, [profile, isLoaded])
+  }, [profile, isLoaded]);
 
   const addItem = (item: Omit<LearningItem, "id" | "dateAdded">) => {
     const newItem: LearningItem = {
       ...item,
       id: Date.now().toString(),
       dateAdded: new Date().toISOString().split("T")[0],
-    }
-    setItems([newItem, ...items])
+    };
+    setItems([newItem, ...items]);
 
     // Update profile points and streak
     setProfile((prev) => ({
       ...prev,
       totalPoints:
-        prev.totalPoints + (item.difficulty === "advanced" ? 30 : item.difficulty === "intermediate" ? 20 : 10),
+        prev.totalPoints +
+        (item.difficulty === "advanced"
+          ? 30
+          : item.difficulty === "intermediate"
+            ? 20
+            : 10),
       learningsSinceReset: prev.learningsSinceReset + 1,
-    }))
-  }
+    }));
+  };
 
   const deleteItem = (id: string) => {
-    setItems(items.filter((item) => item.id !== id))
-  }
+    setItems(items.filter((item) => item.id !== id));
+  };
 
   const addCategory = (category: Omit<Category, "id">) => {
     const newCategory: Category = {
       ...category,
       id: Date.now().toString(),
-    }
-    setCategories([...categories, newCategory])
-  }
+    };
+    setCategories([...categories, newCategory]);
+  };
 
   const updateProfile = (updatedProfile: Partial<UserProfile>) => {
-    setProfile((prev) => ({ ...prev, ...updatedProfile }))
-  }
+    setProfile((prev) => ({ ...prev, ...updatedProfile }));
+  };
 
   const getItemsByCategory = (category: string) => {
-    return items.filter((item) => item.category.id === category)
-  }
+    return items.filter((item) => item.category.id === category);
+  };
 
   const getItemsByTopic = (topic: string) => {
-    return items.filter((item) => item.topic === topic)
-  }
+    return items.filter((item) => item.topic === topic);
+  };
 
   return (
     <LearningContext.Provider
@@ -158,13 +169,13 @@ export function LearningProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
     </LearningContext.Provider>
-  )
+  );
 }
 
 export function useLearning() {
-  const context = useContext(LearningContext)
+  const context = useContext(LearningContext);
   if (!context) {
-    throw new Error("useLearning must be used within LearningProvider")
+    throw new Error("useLearning must be used within LearningProvider");
   }
-  return context
+  return context;
 }

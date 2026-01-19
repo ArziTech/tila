@@ -1,27 +1,32 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useLearning } from "@/context/learning-context"
-import LearningCard from "./card"
+import { useState } from "react";
+import { useLearning } from "@/context/learning-context";
+import LearningCard from "./card";
 
 interface LearningListProps {
-  recentOnly?: boolean
-  limit?: number
+  recentOnly?: boolean;
+  limit?: number;
 }
 
-export default function LearningList({ recentOnly = false, limit }: LearningListProps) {
-  const { items, categories } = useLearning()
-  const [filterCategory, setFilterCategory] = useState<string>("")
-  const [searchQuery, setSearchQuery] = useState<string>("")
+export default function LearningList({
+  recentOnly = false,
+  limit,
+}: LearningListProps) {
+  const { items, categories } = useLearning();
+  const [filterCategory, setFilterCategory] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
-  let displayItems = items
+  let displayItems = items;
 
   if (recentOnly) {
-    displayItems = items.slice(0, limit || items.length)
+    displayItems = items.slice(0, limit || items.length);
   }
 
   if (filterCategory) {
-    displayItems = displayItems.filter((item) => item.category.id === filterCategory)
+    displayItems = displayItems.filter(
+      (item) => item.category.id === filterCategory,
+    );
   }
 
   if (searchQuery) {
@@ -30,14 +35,16 @@ export default function LearningList({ recentOnly = false, limit }: LearningList
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.description.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
+    );
   }
 
   return (
     <div className="space-y-6">
       {!recentOnly && (
         <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-          <h2 className="text-2xl font-bold mb-4 text-primary">All Learnings</h2>
+          <h2 className="text-2xl font-bold mb-4 text-primary">
+            All Learnings
+          </h2>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <input
@@ -78,5 +85,5 @@ export default function LearningList({ recentOnly = false, limit }: LearningList
         )}
       </div>
     </div>
-  )
+  );
 }

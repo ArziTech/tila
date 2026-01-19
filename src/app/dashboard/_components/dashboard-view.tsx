@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Award, BookOpen, Clock, Flame } from "lucide-react";
 import { useLearning } from "@/context/learning-context";
@@ -13,18 +13,35 @@ interface Props {
 }
 
 const DashboardView = ({ user }: Props) => {
-  const { items } = useLearning()
+  const { items } = useLearning();
 
-  const [stats, _setStats] = useState<DashboardStats>({ currentStreak: 0, todayHours: 0, totalHours: 0, totalLogs: 0, level: 1 });
+  const [stats, _setStats] = useState<DashboardStats>({
+    currentStreak: 0,
+    todayHours: 0,
+    totalHours: 0,
+    totalLogs: 0,
+    level: 1,
+  });
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome back, {user?.displayName}! 👋</h2>
-          <p className="text-gray-500">You've been consistent! Keep up the good work.</p>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">
+            Welcome back, {user?.displayName}! 👋
+          </h2>
+          <p className="text-gray-500">
+            You've been consistent! Keep up the good work.
+          </p>
         </div>
         <div className="text-right hidden md:block">
-          <p className="text-sm font-medium text-gray-400">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <p className="text-sm font-medium text-gray-400">
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </p>
         </div>
       </div>
 
@@ -33,28 +50,37 @@ const DashboardView = ({ user }: Props) => {
         <Card className="flex flex-col justify-between hover:shadow-md transition">
           <CardHeader>
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-orange-50 rounded-2xl"><Flame className="text-orange-500" size={24} /></div>
-              <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">Active</span>
+              <div className="p-3 bg-orange-50 rounded-2xl">
+                <Flame className="text-orange-500" size={24} />
+              </div>
+              <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                Active
+              </span>
             </div>
           </CardHeader>
           <CardContent>
             <div>
-              <p className="text-3xl font-bold text-gray-800">{stats.currentStreak}</p>
+              <p className="text-3xl font-bold text-gray-800">
+                {stats.currentStreak}
+              </p>
               <p className="text-sm text-gray-500">Day Streak</p>
             </div>
           </CardContent>
         </Card>
 
         <Card className="flex flex-col justify-between hover:shadow-md transition">
-
           <CardHeader>
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-blue-50 rounded-2xl"><Clock className="text-blue-500" size={24} /></div>
+              <div className="p-3 bg-blue-50 rounded-2xl">
+                <Clock className="text-blue-500" size={24} />
+              </div>
             </div>
           </CardHeader>
           <CardContent>
             <div>
-              <p className="text-3xl font-bold text-gray-800">{stats.todayHours.toFixed(1)}h</p>
+              <p className="text-3xl font-bold text-gray-800">
+                {stats.todayHours.toFixed(1)}h
+              </p>
               <p className="text-sm text-gray-500">Learned Today</p>
             </div>
           </CardContent>
@@ -63,12 +89,16 @@ const DashboardView = ({ user }: Props) => {
         <Card className="flex flex-col justify-between hover:shadow-md transition">
           <CardHeader>
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-purple-50 rounded-2xl"><BookOpen className="text-purple-500" size={24} /></div>
+              <div className="p-3 bg-purple-50 rounded-2xl">
+                <BookOpen className="text-purple-500" size={24} />
+              </div>
             </div>
           </CardHeader>
           <CardContent>
             <div>
-              <p className="text-3xl font-bold text-gray-800">{stats.totalHours.toFixed(0)}h</p>
+              <p className="text-3xl font-bold text-gray-800">
+                {stats.totalHours.toFixed(0)}h
+              </p>
               <p className="text-sm text-gray-500">Total Hours</p>
             </div>
           </CardContent>
@@ -77,12 +107,16 @@ const DashboardView = ({ user }: Props) => {
         <Card className="flex flex-col justify-between hover:shadow-md transition">
           <CardHeader>
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-pink-50 rounded-2xl"><Award className="text-pink-500" size={24} /></div>
+              <div className="p-3 bg-pink-50 rounded-2xl">
+                <Award className="text-pink-500" size={24} />
+              </div>
             </div>
           </CardHeader>
           <CardContent>
             <div>
-              <p className="text-3xl font-bold text-gray-800">Lvl {stats.level}</p>
+              <p className="text-3xl font-bold text-gray-800">
+                Lvl {stats.level}
+              </p>
               <p className="text-sm text-gray-500">Current Level</p>
             </div>
           </CardContent>
@@ -96,28 +130,20 @@ const DashboardView = ({ user }: Props) => {
         </div>
         <div>
           <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 text-primary">Quick Add</h3>
-            <Button
-              variant='gradient'
-              onClick={() => { }}
-              className="w-full"
-            >
+            <h3 className="text-lg font-semibold mb-4 text-primary">
+              Quick Add
+            </h3>
+            <Button variant="gradient" onClick={() => {}} className="w-full">
               + Add Learning
             </Button>
-            <Button
-              variant={'outline'}
-              className="w-full mt-2"
-              asChild
-            >
-              <Link href="/items">
-                View All ({items.length})
-              </Link>
+            <Button variant={"outline"} className="w-full mt-2" asChild>
+              <Link href="/dashboard/items">View All ({items.length})</Link>
             </Button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 };
 
 export default DashboardView;

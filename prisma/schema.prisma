@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  username    String
+  avatar_url  String
+  total_points Int      @default(0)
+  current_streak Int    @default(0)
+  longest_streak Int    @default(0)
+  items       Item[]
+  todos       Todo[]
+  categories  Category[]
+  user        User     @relation(fields: [id], references: [id])
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  color       String
+  items       Item[]
+  profile     Profile  @relation(fields: [profileId], references: [id])
+  profileId   String
+}
+
+model Item {
+  id               String   @id @default(uuid())
+  title            String
+  description      String
+  category         Category @relation(fields: [categoryId], references: [id])
+  categoryId       String
+  topic            String
+  date_added       DateTime @default(now())
+  difficulty       String
+  tags             String[]
+  duration_minutes Int      @default(0)
+  profile          Profile  @relation(fields: [profileId], references: [id])
+  profileId        String
+}
+
+model Todo {
+  id          String   @id @default(uuid())
+  title       String
+  completed   Boolean  @default(false)
+  profile     Profile  @relation(fields: [profileId], references: [id])
+  profileId   String
+}
+
+model User {
+  id      String   @id @default(uuid())
+  email   String   @unique
+  profile Profile?
+}
