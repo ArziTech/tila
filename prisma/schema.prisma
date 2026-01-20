@@ -9,6 +9,14 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum TodoStatus {
+  ONGOING
+  ARCHIVED
+  COMPLETED
+  CANCELED
+  CONTINUE_LATER
+}
 model Account {
   id                       String  @id @default(cuid())
   userId                   String  @unique
@@ -63,6 +71,7 @@ model Category {
   name        String
   color       String
   items       Item[]
+  todos       Todo[]
   user     User  @relation(fields: [userId], references: [id])
   userId   String
 }
@@ -80,15 +89,27 @@ model Item {
   duration_minutes Int      @default(0)
   user          User  @relation(fields: [userId], references: [id])
   userId        String
+  todos           Todo[]
 }
 
 model Todo {
-  id                String   @id @default(uuid())
+  id                String     @id @default(uuid())
   title             String
-  completed         Boolean  @default(false)
-  user           User  @relation(fields: [userId], references: [id])
-  userId         String
-  priority          Int      @default(3)
+  content           String?    @db.Text
+  status            TodoStatus @default(ONGOING)
+  priority          Int        @default(3)
+  order             Int        @default(0)
+  dueDate           DateTime?
   estimatedDuration Int?
-  categoryId        String?
+  completedAt       DateTime?
+
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String
+  category       Category? @relation(fields: [categoryId], references: [id])
+  categoryId     String?
+  itemId         String?
+  item           Item?    @relation(fields: [itemId], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
