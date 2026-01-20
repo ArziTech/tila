@@ -1,6 +1,5 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Category, Item } from "@/generated/prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Calendar, Clock, Folder, Hash, Layout } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -25,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Category, Item } from "@/generated/prisma/client";
 import Tiptap from "./editor";
 
 interface NoteDetailProps {

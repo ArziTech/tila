@@ -1,0 +1,16 @@
+services:
+  postgres:
+    container_name: tila-db
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devonly
+      POSTGRES_DB: postgres
+      DATABASE_URL: "postgresql://postgres:devonly@localhost:5432/postgres?schema=public"
+    volumes:
+      - tila_dev_data:/var/lib/postgresql/data
+
+volumes:
+  tila_dev_data:

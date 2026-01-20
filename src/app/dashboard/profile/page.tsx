@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { getProfilePageData } from "@/actions/dashboard";
 import { updateUserProfile } from "@/actions/user";
@@ -19,11 +20,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+import { AvatarSelection } from "./_components/avatar-selection";
+
 const profileFormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
-  avatar: z.string(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -45,7 +47,6 @@ export default function ProfilePanel() {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       name: "",
-      avatar: "",
     },
   });
 
@@ -53,7 +54,6 @@ export default function ProfilePanel() {
     if (session?.user) {
       form.reset({
         name: session.user.name ?? "",
-        avatar: session.user.image ?? "",
       });
     }
   }, [session, form]);
@@ -62,17 +62,18 @@ export default function ProfilePanel() {
     if (session?.user?.id) {
       const response = await updateUserProfile(session.user.id, {
         username: data.name,
-        image: data.avatar,
       });
 
       if (response.status === "SUCCESS") {
         await update({
           ...session,
-          user: { ...session.user, name: data.name, image: data.avatar },
+          user: { ...session.user, name: data.name },
         });
         form.reset(data);
+        toast.success("Profile updated successfully!");
       } else {
         console.error("Error updating profile:", response.error);
+        toast.error("Failed to update profile.");
       }
     }
   };
@@ -98,7 +99,7 @@ export default function ProfilePanel() {
     return <div>You must be signed in to view this page.</div>;
   }
 
-  if (isError || profileData?.status === "ERROR") {
+  if (isError || profileData?.status === "ERROR" || !profileData) {
     return <div>Error loading profile data.</div>;
   }
 
@@ -108,57 +109,34 @@ export default function ProfilePanel() {
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="bg-card rounded-xl border border-border p-8 shadow-sm">
         <h2 className="text-2xl font-bold mb-6 text-primary">Your Profile</h2>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="avatar"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Choose Avatar</FormLabel>
-                  <FormControl>
-                    <div className="flex flex-wrap gap-3">
-                      {avatarOptions.map((avatar) => (
-                        <button
-                          type="button"
-                          key={avatar}
-                          onClick={() => field.onChange(avatar)}
-                          className={`text-4xl p-3 rounded-lg border-2 transition ${
-                            field.value === avatar
-                              ? "border-primary bg-primary/10"
-                              : "border-border hover:border-primary"
-                          }`}
-                        >
-                          {avatar}
-                        </button>
-                      ))}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Your name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              type="submit"
-              disabled={!form.formState.isDirty || form.formState.isSubmitting}
-            >
-              Save changes
-            </Button>
-          </form>
-        </Form>
+        <div className="space-y-8">
+          <AvatarSelection avatarOptions={avatarOptions} />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                disabled={
+                  !form.formState.isDirty || form.formState.isSubmitting
+                }
+              >
+                Save changes
+              </Button>
+            </form>
+          </Form>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
