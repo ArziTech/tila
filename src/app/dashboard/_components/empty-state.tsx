@@ -2,7 +2,7 @@ const EmptyState = ({
   icon: Icon,
   message,
 }: {
-  icon: any;
+  icon: React.ElementType;
   message: string;
 }) => (
   <div className="text-center py-12 text-gray-400 flex flex-col items-center">

@@ -1,6 +1,6 @@
 import { Calendar, Clock, Trash2 } from "lucide-react";
-import { Category, Note } from "./list";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import type { Category, Note } from "./list";
 
 interface Props {
   note: Note;
@@ -9,18 +9,14 @@ interface Props {
 }
 
 const NoteCard = ({ note, category, onDelete }: Props) => {
-  const router = useRouter();
-  const onClick = () => {
-    router.push(`/dashboard/items/${note.id}`);
-  };
-
   return (
-    <div
-      onClick={onClick}
+    <Link
+      href={`/dashboard/items/${note.id}`}
       className="group relative bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer"
     >
       <div className="absolute top-5 right-5 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
         <button
+          type="button"
           onClick={onDelete}
           className="p-1.5 bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition shadow-sm"
           title="Delete Note"
@@ -33,7 +29,7 @@ const NoteCard = ({ note, category, onDelete }: Props) => {
         {category && (
           <span
             className="px-2.5 py-1 rounded-full text-xs font-bold tracking-wide uppercase"
-            style={{ backgroundColor: category.color + "40", color: "#555" }}
+            style={{ backgroundColor: `${category.color}40`, color: "#555" }}
           >
             {category.name}
           </span>
@@ -67,7 +63,7 @@ const NoteCard = ({ note, category, onDelete }: Props) => {
           ))}
           {(note.tags?.length || 0) > 3 && (
             <span className="text-[10px] text-gray-400">
-              +{note.tags!.length - 3}
+              +{note.tags?.length - 3}
             </span>
           )}
         </div>
@@ -76,7 +72,7 @@ const NoteCard = ({ note, category, onDelete }: Props) => {
           {note.durationMinutes}m
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

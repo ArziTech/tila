@@ -4,11 +4,11 @@ import Link from "next/link";
 import LearningList from "@/components/learning/list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import type { Item, Profile } from "@/generated/prisma/client";
+import type { Item, User } from "@/generated/prisma/client";
 import type { DashboardStats } from "@/types";
 
 interface Props {
-  user: Profile;
+  user: User;
   items: Item[];
   stats: DashboardStats;
 }

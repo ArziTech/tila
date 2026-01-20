@@ -2,11 +2,12 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { addCategory, getCategories } from "@/actions/categories";
+import type { Category } from "@/generated/prisma/client";
 import { Button } from "../ui/button";
 import {
   Form,
@@ -25,38 +26,31 @@ const formSchema = z.object({
   color: z.string(),
 });
 
-interface CategoryWithCount {
-  id: string;
-  name: string;
-  color: string;
+interface CategoryWithCount extends Category {
   _count: {
     items: number;
   };
 }
 
-const fetchCategories = async () => {
-  const { data } = await axios.get("/api/categories");
-  return data;
-};
-
-const addCategory = async (newCategory: z.infer<typeof formSchema>) => {
-  const { data } = await axios.post("/api/categories", newCategory);
-  return data;
-};
-
 export default function CategoryManager() {
   const queryClient = useQueryClient();
 
-  const { data: categories = [], isLoading } = useQuery<CategoryWithCount[]>({
+  const { data: categoriesResponse, isLoading } = useQuery({
     queryKey: ["categories"],
-    queryFn: fetchCategories,
+    queryFn: getCategories,
   });
+
+  const categories: CategoryWithCount[] = categoriesResponse?.data || [];
 
   const mutation = useMutation({
     mutationFn: addCategory,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success(`Category "${data.name}" added successfully!`);
+    onSuccess: (response) => {
+      if (response.status === "SUCCESS" && response.data) {
+        queryClient.invalidateQueries({ queryKey: ["categories"] });
+        toast.success(`Category "${response.data.name}" added successfully!`);
+      } else {
+        toast.error(response.error || "Failed to add category.");
+      }
     },
     onError: (error) => {
       toast.error("Failed to add category.");

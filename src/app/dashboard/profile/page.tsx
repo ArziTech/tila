@@ -1,56 +1,78 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { getProfilePageData } from "@/actions/dashboard";
+import { updateUserProfile } from "@/actions/user";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+const profileFormSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  avatar: z.string(),
+});
+
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function ProfilePanel() {
-  const supabase = createClient();
-  const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState({ name: "", avatar: "" });
-  const [editedName, setEditedName] = useState("");
-  const [editedAvatar, setEditedAvatar] = useState("");
+  const { data: session, status: sessionStatus, update } = useSession();
 
-  const getProfile = useCallback(async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-      if (error) {
-        console.error("Error fetching profile:", error);
-      } else if (data) {
-        setProfile({ name: data.username, avatar: data.avatar_url });
-        setEditedName(data.username);
-        setEditedAvatar(data.avatar_url);
-      }
-    }
-  }, [supabase]);
+  const {
+    data: profileData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["profile-stats"],
+    queryFn: async () => getProfilePageData(),
+    enabled: sessionStatus === "authenticated",
+  });
+
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      name: "",
+      avatar: "",
+    },
+  });
 
   useEffect(() => {
-    getProfile();
-  }, [getProfile]);
+    if (session?.user) {
+      form.reset({
+        name: session.user.name ?? "",
+        avatar: session.user.image ?? "",
+      });
+    }
+  }, [session, form]);
 
-  const handleSave = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          username: editedName,
-          avatar_url: editedAvatar,
-        })
-        .eq("id", user.id);
-      if (error) {
-        console.error("Error updating profile:", error);
+  const onSubmit = async (data: ProfileFormValues) => {
+    if (session?.user?.id) {
+      const response = await updateUserProfile(session.user.id, {
+        username: data.name,
+        image: data.avatar,
+      });
+
+      if (response.status === "SUCCESS") {
+        await update({
+          ...session,
+          user: { ...session.user, name: data.name, image: data.avatar },
+        });
+        form.reset(data);
       } else {
-        setProfile({ name: editedName, avatar: editedAvatar });
-        setIsEditing(false);
+        console.error("Error updating profile:", response.error);
       }
     }
   };
@@ -68,129 +90,92 @@ export default function ProfilePanel() {
     "🎨",
   ];
 
-  // Hardcoded stats for now, as they are not in the database
-  const uniqueCategories = 5;
-  const advancedCount = 2;
-  const intermediateCount = 8;
-  const beginnerCount = 10;
-  const profileStats = {
-    totalPoints: 1250,
-    currentStreak: 12,
-    longestStreak: 25,
-    learnings: 20,
-  };
+  if (sessionStatus === "loading" || isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (sessionStatus === "unauthenticated") {
+    return <div>You must be signed in to view this page.</div>;
+  }
+
+  if (isError || profileData?.status === "ERROR") {
+    return <div>Error loading profile data.</div>;
+  }
+
+  const { stats } = profileData.data;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="bg-card rounded-xl border border-border p-8 shadow-sm">
         <h2 className="text-2xl font-bold mb-6 text-primary">Your Profile</h2>
-
-        {!isEditing ? (
-          <div className="space-y-6">
-            <div className="flex items-center gap-6">
-              <div className="text-7xl">{profile.avatar}</div>
-              <div>
-                <h3 className="text-3xl font-bold">{profile.name}</h3>
-                <p className="text-muted-foreground">Learning Enthusiast</p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsEditing(true)}
-              className="px-6 py-2 bg-primary hover:opacity-90 text-primary-foreground font-medium rounded-lg transition"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="avatar"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Choose Avatar</FormLabel>
+                  <FormControl>
+                    <div className="flex flex-wrap gap-3">
+                      {avatarOptions.map((avatar) => (
+                        <button
+                          type="button"
+                          key={avatar}
+                          onClick={() => field.onChange(avatar)}
+                          className={`text-4xl p-3 rounded-lg border-2 transition ${
+                            field.value === avatar
+                              ? "border-primary bg-primary/10"
+                              : "border-border hover:border-primary"
+                          }`}
+                        >
+                          {avatar}
+                        </button>
+                      ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Your name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              disabled={!form.formState.isDirty || form.formState.isSubmitting}
             >
-              Edit Profile
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div>
-              <label
-                htmlFor="avatar-1"
-                className="block text-sm font-medium mb-3"
-              >
-                Choose Avatar
-              </label>
-              <div className="flex flex-wrap gap-3">
-                {avatarOptions.map((avatar, index) => (
-                  <button
-                    id={index === 0 ? "avatar-1" : undefined}
-                    type="button"
-                    key={avatar}
-                    onClick={() => setEditedAvatar(avatar)}
-                    className={`text-4xl p-3 rounded-lg border-2 transition ${
-                      editedAvatar === avatar
-                        ? "border-primary bg-primary/10"
-                        : "border-border hover:border-primary"
-                    }`}
-                  >
-                    {avatar}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-2">
-                Name
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={editedName}
-                onChange={(e) => setEditedName(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-input bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={handleSave}
-                className="flex-1 bg-primary hover:opacity-90 text-primary-foreground font-medium py-2 rounded-lg transition"
-              >
-                Save
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditedName(profile.name);
-                  setEditedAvatar(profile.avatar);
-                  setIsEditing(false);
-                }}
-                className="flex-1 bg-muted hover:bg-muted/80 text-muted-foreground font-medium py-2 rounded-lg transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+              Save changes
+            </Button>
+          </form>
+        </Form>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <StatBox
-          title="Total Points"
-          value={profileStats.totalPoints}
-          icon="⭐"
-        />
+        <StatBox title="Total Points" value={stats.totalPoints} icon="⭐" />
         <StatBox
           title="Current Streak"
-          value={profileStats.currentStreak}
+          value={stats.currentStreak}
           icon="🔥"
           suffix="days"
         />
         <StatBox
           title="Longest Streak"
-          value={profileStats.longestStreak}
+          value={stats.longestStreak}
           icon="🏆"
           suffix="days"
         />
-        <StatBox
-          title="Total Learnings"
-          value={profileStats.learnings}
-          icon="📚"
-        />
+        <StatBox title="Total Learnings" value={stats.learnings} icon="📚" />
       </div>
 
       <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
@@ -198,13 +183,13 @@ export default function ProfilePanel() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Categories Explored</span>
-            <span className="font-semibold">{uniqueCategories}</span>
+            <span className="font-semibold">{stats.uniqueCategories}</span>
           </div>
-          <div className="border-t border-border"></div>
+          <div className="border-t border-border" />
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Advanced Learnings</span>
             <span className="font-semibold text-destructive">
-              {advancedCount}
+              {stats.advancedCount}
             </span>
           </div>
           <div className="flex items-center justify-between">
@@ -212,12 +197,14 @@ export default function ProfilePanel() {
               Intermediate Learnings
             </span>
             <span className="font-semibold text-secondary">
-              {intermediateCount}
+              {stats.intermediateCount}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Beginner Learnings</span>
-            <span className="font-semibold text-success">{beginnerCount}</span>
+            <span className="font-semibold text-success">
+              {stats.beginnerCount}
+            </span>
           </div>
         </div>
       </div>

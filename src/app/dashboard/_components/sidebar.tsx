@@ -1,29 +1,19 @@
 "use client";
+import { LogOut, Menu, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { signOutAction } from "@/actions/auth/index";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Views, ViewState } from "@/types";
-import {
-  BarChart2,
-  CheckCircle,
-  FileText,
-  Home,
-  ListTodo,
-  LogOut,
-  Menu,
-  X,
-} from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { Views } from "@/types";
 
 //
 // --- Sidebar Component ---
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const currentView = usePathname();
-  const router = useRouter();
-  const supabase = createClient();
+  const _router = useRouter();
 
   return (
     <aside
@@ -39,6 +29,7 @@ const Sidebar = () => {
           </div>
         )}
         <button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="text-gray-400 hover:text-gray-600"
         >
@@ -65,18 +56,15 @@ const Sidebar = () => {
       </nav>
 
       <div className="p-4 border-t border-gray-100">
-        <button
-          onClick={async () => {
-            const { error } = await supabase.auth.signOut();
-            if (!error) {
-              router.push("/login");
-            }
-          }}
-          className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition"
-        >
-          <LogOut size={20} />
-          {isOpen && <span className="font-medium">Logout</span>}
-        </button>
+        <form action={signOutAction}>
+          <button
+            type="submit"
+            className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition"
+          >
+            <LogOut size={20} />
+            {isOpen && <span className="font-medium">Logout</span>}
+          </button>
+        </form>
       </div>
     </aside>
   );

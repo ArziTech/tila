@@ -1,25 +1,15 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { useState } from "react";
-import type { Category, Item } from "@/generated/prisma";
+import { getCategories } from "@/actions/categories";
+import { getItems } from "@/actions/items";
 import LearningCard from "./card";
 
 interface LearningListProps {
   recentOnly?: boolean;
   limit?: number;
 }
-
-const fetchItems = async () => {
-  const { data } = await axios.get("/api/items");
-  return data;
-};
-
-const fetchCategories = async () => {
-  const { data } = await axios.get("/api/categories");
-  return data;
-};
 
 export default function LearningList({
   recentOnly = false,
@@ -28,19 +18,18 @@ export default function LearningList({
   const [filterCategory, setFilterCategory] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const { data: items = [], isLoading: areItemsLoading } = useQuery<
-    (Item & { category: Category })[]
-  >({
+  const { data: itemsResponse, isLoading: areItemsLoading } = useQuery({
     queryKey: ["items"],
-    queryFn: fetchItems,
+    queryFn: getItems,
   });
+  const items = itemsResponse?.data || [];
 
-  const { data: categories = [], isLoading: areCategoriesLoading } = useQuery<
-    Category[]
-  >({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
-  });
+  const { data: categoriesResponse, isLoading: areCategoriesLoading } =
+    useQuery({
+      queryKey: ["categories"],
+      queryFn: getCategories,
+    });
+  const categories = categoriesResponse?.data || [];
 
   let displayItems = items;
 
@@ -110,9 +99,7 @@ export default function LearningList({
             </p>
           </div>
         ) : (
-          displayItems.map((item) => (
-            <LearningCard key={item.id} item={item} categories={categories} />
-          ))
+          displayItems.map((item) => <LearningCard key={item.id} item={item} />)
         )}
       </div>
     </div>

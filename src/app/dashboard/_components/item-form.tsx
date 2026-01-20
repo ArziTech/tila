@@ -3,12 +3,14 @@
 import type React from "react";
 
 import { useState } from "react";
-import { useLearning } from "@/context/learning-context";
 import { Button } from "@/components/ui/button";
+import { useLearning } from "@/context/learning-context";
 
 interface ItemFormProps {
   onComplete: () => void;
 }
+
+type Difficulty = "beginner" | "intermediate" | "advanced";
 
 const ItemForm = ({ onComplete }: ItemFormProps) => {
   const { categories, addItem } = useLearning();
@@ -17,7 +19,7 @@ const ItemForm = ({ onComplete }: ItemFormProps) => {
     description: "",
     category: categories[0]?.id || "",
     topic: "",
-    difficulty: "intermediate" as const,
+    difficulty: "intermediate" as Difficulty,
     tags: "",
   });
 
@@ -66,9 +68,12 @@ const ItemForm = ({ onComplete }: ItemFormProps) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2">Title *</label>
+            <label htmlFor="title" className="block text-sm font-medium mb-2">
+              Title *
+            </label>
             <input
               type="text"
+              id="title"
               value={formData.title}
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
@@ -79,10 +84,14 @@ const ItemForm = ({ onComplete }: ItemFormProps) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium mb-2"
+            >
               Description
             </label>
             <textarea
+              id="description"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
@@ -95,10 +104,14 @@ const ItemForm = ({ onComplete }: ItemFormProps) => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium mb-2"
+              >
                 Category *
               </label>
               <select
+                id="category"
                 value={formData.category}
                 onChange={(e) =>
                   setFormData({ ...formData, category: e.target.value })
@@ -114,9 +127,12 @@ const ItemForm = ({ onComplete }: ItemFormProps) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Topic *</label>
+              <label htmlFor="topic" className="block text-sm font-medium mb-2">
+                Topic *
+              </label>
               <input
                 type="text"
+                id="topic"
                 value={formData.topic}
                 onChange={(e) =>
                   setFormData({ ...formData, topic: e.target.value })
@@ -129,15 +145,19 @@ const ItemForm = ({ onComplete }: ItemFormProps) => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="difficulty"
+                className="block text-sm font-medium mb-2"
+              >
                 Difficulty
               </label>
               <select
+                id="difficulty"
                 value={formData.difficulty}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    difficulty: e.target.value as any,
+                    difficulty: e.target.value as Difficulty,
                   })
                 }
                 className="w-full px-4 py-2 rounded-lg border border-input bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -149,11 +169,12 @@ const ItemForm = ({ onComplete }: ItemFormProps) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label htmlFor="tags" className="block text-sm font-medium mb-2">
                 Tags (comma separated)
               </label>
               <input
                 type="text"
+                id="tags"
                 value={formData.tags}
                 onChange={(e) =>
                   setFormData({ ...formData, tags: e.target.value })

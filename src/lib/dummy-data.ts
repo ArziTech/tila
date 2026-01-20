@@ -1,6 +1,6 @@
 import type {
-  LearningItem,
   Category,
+  LearningItem,
   UserProfile,
 } from "@/context/learning-context";
 

@@ -1,16 +1,13 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import type { Category, Item } from "@/generated/prisma";
+import { toast } from "sonner";
+import { deleteItem } from "@/actions/items";
+import type { Category, Item } from "@/generated/prisma/client";
 
 interface LearningCardProps {
-  item: Item & { category: Category };
+  item: Item & { category: Category | null };
 }
-
-const deleteItem = async (id: string) => {
-  await axios.delete(`/api/items/${id}`);
-};
 
 export default function LearningCard({ item }: LearningCardProps) {
   const queryClient = useQueryClient();
@@ -19,6 +16,10 @@ export default function LearningCard({ item }: LearningCardProps) {
     mutationFn: deleteItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
+      toast.success("Item deleted successfully!");
+    },
+    onError: () => {
+      toast.error("Failed to delete item.");
     },
   });
 

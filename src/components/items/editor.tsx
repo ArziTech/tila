@@ -1,31 +1,36 @@
 "use client";
 
-import Underline from "@tiptap/extension-underline";
+import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import Typography from "@tiptap/extension-typography";
 import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
-
 import TextAlign from "@tiptap/extension-text-align";
-import Highlight from "@tiptap/extension-highlight";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import Typography from "@tiptap/extension-typography";
+import Underline from "@tiptap/extension-underline";
+import { EditorContent, useEditor } from "@tiptap/react";
 import { BubbleMenu, FloatingMenu } from "@tiptap/react/menus";
+import StarterKit from "@tiptap/starter-kit";
 import "./tiptap.css";
-import { Button } from "../ui/button";
-import { editorBtn } from "./editor-btn";
 
 import {
   Bold,
-  Italic,
-  Underline as UnderlineIcon,
-  Strikethrough,
   Code,
   Highlighter,
+  Italic,
   Link as LinkIcon,
+  Strikethrough,
+  Underline as UnderlineIcon,
 } from "lucide-react";
-const Tiptap = () => {
+import { Button } from "../ui/button";
+import { editorBtn } from "./editor-btn";
+
+interface TiptapProps {
+  description: string;
+  onChange: (richText: string) => void;
+}
+
+const Tiptap = ({ description, onChange }: TiptapProps) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -46,7 +51,16 @@ const Tiptap = () => {
         types: ["heading", "paragraph"],
       }),
     ],
-    content: "<p>Hello World! 🌎️</p>",
+    content: description,
+    editorProps: {
+      attributes: {
+        class:
+          "prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none",
+      },
+    },
+    onUpdate({ editor }) {
+      onChange(editor.getHTML());
+    },
     immediatelyRender: false,
   });
 
@@ -130,6 +144,7 @@ const Tiptap = () => {
       </BubbleMenu>
       <FloatingMenu className="floating-menu" editor={editor}>
         <button
+          type="button"
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 1 }).run()
           }
@@ -140,6 +155,7 @@ const Tiptap = () => {
           H1
         </button>
         <button
+          type="button"
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 2 }).run()
           }
@@ -150,6 +166,7 @@ const Tiptap = () => {
           H2
         </button>
         <button
+          type="button"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={editor.isActive("bulletList") ? "is-active" : ""}
         >

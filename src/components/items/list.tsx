@@ -1,8 +1,10 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BookOpen, Plus, Search } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { getCategories } from "@/actions/categories";
+import { addItem, deleteItem, getItems } from "@/actions/items";
 import { Button } from "../ui/button";
 import NoteCard from "./card";
 import CreateNoteModal from "./create-note-modal";
@@ -15,6 +17,8 @@ export interface Note {
   durationMinutes: number;
   date: string;
   tags?: string[];
+  topic: string;
+  difficulty: string;
 }
 
 export interface Category {
@@ -24,29 +28,50 @@ export interface Category {
   icon: string;
 }
 
-const fetchItems = async () => {
-  const { data } = await axios.get("/api/items");
-  return data;
-};
-
-const fetchCategories = async () => {
-  const { data } = await axios.get("/api/categories");
-  return data;
-};
-
 const ItemList = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const queryClient = useQueryClient();
 
-  const { data: notes = [], isLoading: areNotesLoading } = useQuery({
+  const { data: itemsResponse, isLoading: areNotesLoading } = useQuery({
     queryKey: ["items"],
-    queryFn: fetchItems,
+    queryFn: getItems,
+  });
+  const notes = itemsResponse?.data || [];
+
+  const { data: categoriesResponse, isLoading: areCategoriesLoading } =
+    useQuery({
+      queryKey: ["categories"],
+      queryFn: getCategories,
+    });
+  const categories = categoriesResponse?.data || [];
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["items"] });
+      toast.success("Note deleted successfully!");
+    },
+    onError: () => {
+      toast.error("Failed to delete note.");
+    },
   });
 
-  const { data: categories = [], isLoading: areCategoriesLoading } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
+  const addItemMutation = useMutation({
+    mutationFn: addItem,
+    onSuccess: (response) => {
+      if (response.status === "SUCCESS") {
+        queryClient.invalidateQueries({ queryKey: ["items"] });
+        toast.success("Note added successfully!");
+        setIsModalOpen(false);
+      } else {
+        toast.error(response.error || "Failed to add note.");
+      }
+    },
+    onError: () => {
+      toast.error("Failed to add note.");
+    },
   });
 
   const filteredNotes = notes.filter((note: Note) => {
@@ -117,7 +142,7 @@ const ItemList = () => {
             >
               All Notes
             </button>
-            {categories.map((cat: Category) => (
+            {categories.map((cat) => (
               <button
                 type="button"
                 key={cat.id}
@@ -143,15 +168,16 @@ const ItemList = () => {
       <div className="max-w-7xl mx-auto">
         {filteredNotes.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredNotes.map((note: Note) => (
+            {filteredNotes.map((note) => (
               <NoteCard
                 key={note.id}
                 note={note}
                 category={categories.find(
                   (c: Category) => c.id === note.categoryId,
                 )}
-                onDelete={() => {
-                  /*e.stopPropagation(); handleDeleteNote(note.id);*/
+                onDelete={(e) => {
+                  e.stopPropagation();
+                  deleteMutation.mutate(note.id);
                 }}
               />
             ))}
@@ -185,7 +211,7 @@ const ItemList = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         categories={categories}
-        onSubmit={() => {}}
+        onSubmit={(values) => addItemMutation.mutate(values)}
       />
     </div>
   );

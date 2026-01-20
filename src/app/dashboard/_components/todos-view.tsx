@@ -1,63 +1,69 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { Clock, ListTodo, Plus, X } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { addTodo, deleteTodo, getTodos, updateTodo } from "@/actions/todos";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import type { Todo } from "@/generated/prisma/client";
 import { formatDuration } from "@/lib/utils";
 import EmptyState from "./empty-state";
-
-const fetchTodos = async () => {
-  const { data } = await axios.get("/api/todos");
-  return data;
-};
-
-const addTodo = async (newTodo: { title: string }) => {
-  const { data } = await axios.post("/api/todos", newTodo);
-  return data;
-};
-
-const updateTodo = async (updatedTodo: { id: string; completed: boolean }) => {
-  const { data } = await axios.put(`/api/todos/${updatedTodo.id}`, updatedTodo);
-  return data;
-};
-
-const deleteTodo = async (id: string) => {
-  await axios.delete(`/api/todos/${id}`);
-};
 
 const TodosView = () => {
   const queryClient = useQueryClient();
   const [newTodoTitle, setNewTodoTitle] = useState("");
 
-  const { data: todos = [], isLoading } = useQuery<Todo[]>({
+  const { data: todosResponse, isLoading } = useQuery({
     queryKey: ["todos"],
-    queryFn: fetchTodos,
+    queryFn: getTodos,
   });
+  const todos = todosResponse?.data || [];
 
   const addMutation = useMutation({
     mutationFn: addTodo,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
-      setNewTodoTitle("");
+    onSuccess: (response) => {
+      if (response.status === "SUCCESS") {
+        queryClient.invalidateQueries({ queryKey: ["todos"] });
+        setNewTodoTitle("");
+        toast.success("Todo added successfully!");
+      } else {
+        toast.error(response.error || "Failed to add todo.");
+      }
+    },
+    onError: () => {
+      toast.error("Failed to add todo.");
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: updateTodo,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
+    onSuccess: (response) => {
+      if (response.status === "SUCCESS") {
+        queryClient.invalidateQueries({ queryKey: ["todos"] });
+        toast.success("Todo updated successfully!");
+      } else {
+        toast.error(response.error || "Failed to update todo.");
+      }
+    },
+    onError: () => {
+      toast.error("Failed to update todo.");
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteTodo,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
+    onSuccess: (response) => {
+      if (response.status === "SUCCESS") {
+        queryClient.invalidateQueries({ queryKey: ["todos"] });
+        toast.success("Todo deleted successfully!");
+      } else {
+        toast.error(response.error || "Failed to delete todo.");
+      }
+    },
+    onError: () => {
+      toast.error("Failed to delete todo.");
     },
   });
 

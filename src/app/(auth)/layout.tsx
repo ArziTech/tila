@@ -1,6 +1,6 @@
-import { Card } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -27,7 +27,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         {children}
       </Card>
     </div>
-  )
-}
+  );
+};
 
 export default AuthLayout;

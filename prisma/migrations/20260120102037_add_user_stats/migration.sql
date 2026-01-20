@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "advancedCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "beginnerCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "intermediateCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "learnings" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "uniqueCategories" INTEGER NOT NULL DEFAULT 0;

@@ -1,51 +1,22 @@
-"use client";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { notFound, useParams } from "next/navigation";
+import { notFound } from "next/navigation";
+import { getCategories } from "@/actions/categories";
+import { getItem } from "@/actions/items";
 import NoteDetails from "@/components/items/details";
-import type { Note } from "@/components/items/list";
 
-const fetchNote = async (id: string) => {
-  const { data } = await axios.get(`/api/items/${id}`);
-  return data;
-};
+const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
 
-const fetchCategories = async () => {
-  const { data } = await axios.get("/api/categories");
-  return data;
-};
+  const noteResponse = await getItem(id);
+  const categoriesResponse = await getCategories();
 
-const Page = () => {
-  const params = useParams();
-  const { id } = params;
-
-  const { data: noteData, isLoading: isNoteLoading } = useQuery({
-    queryKey: ["note", id],
-    queryFn: () => fetchNote(id as string),
-    enabled: !!id,
-  });
-
-  const { data: categoriesData, isLoading: areCategoriesLoading } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
-  });
-
-  if (isNoteLoading || areCategoriesLoading) {
-    return <div>Loading...</div>;
+  if (noteResponse.status === "ERROR" || !noteResponse.data) {
+    notFound();
   }
 
-  if (!noteData) return notFound();
+  const noteData = noteResponse.data;
+  const categoriesData = categoriesResponse.data || [];
 
-  const formattedNote: Note = {
-    id: noteData.id,
-    title: noteData.title,
-    description: noteData.description,
-    categoryId: noteData.categoryId,
-    date: noteData.date_added.toString(),
-    durationMinutes: noteData.duration_minutes,
-  };
-
-  return <NoteDetails note={formattedNote} categories={categoriesData} />;
+  return <NoteDetails note={noteData} categories={categoriesData} />;
 };
 
 export default Page;

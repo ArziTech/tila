@@ -5,7 +5,10 @@ export async function POST(request: Request) {
   const { id, username, avatar_url } = await request.json();
 
   if (!id || !username || !avatar_url) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing required fields" },
+      { status: 400 },
+    );
   }
 
   try {
