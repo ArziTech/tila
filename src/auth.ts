@@ -26,7 +26,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       const existingUser = await getUserById(user.id as string);
-      console.log({ existingUser });
       return !!existingUser;
     },
     // async redirect({ url, baseUrl }) {
@@ -34,7 +33,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // },
 
     async session({ session, token }) {
-      session.user = token.user;
+      // Fetch fresh user data from database to get latest changes
+      const dbUser = await getUserById(token.sub as string);
+
+      if (dbUser.status === "SUCCESS" && dbUser.data) {
+        session.user = {
+          ...session.user,
+          ...dbUser.data,
+        };
+      } else {
+        session.user = token.user;
+      }
       // session.user.roles = token.roles;
       return session;
     },

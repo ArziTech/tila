@@ -87,14 +87,14 @@ const NoteDetails = ({ note, categories }: NoteDetailProps) => {
       >
         <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button
+            <Button
               type="button"
-              onClick={() => router.push("/items")}
-              className="p-2 hover:bg-gray-100 rounded-full transition text-gray-500 hover:text-gray-800"
+              onClick={() => router.push("/dashboard/items")}
+              className=" rounded-full"
               title="Back to Notes"
             >
               <ArrowLeft size={20} />
-            </button>
+            </Button>
             <div className="h-6 w-px bg-gray-200 hidden sm:block" />
             <div className="text-sm text-gray-500 hidden sm:flex items-center gap-2">
               <span className="opacity-60">Notes</span>

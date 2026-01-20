@@ -3,30 +3,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BookOpen, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import type { Category, Item } from "@/generated/prisma/client";
 import { getCategories } from "@/actions/categories";
 import { addItem, deleteItem, getItems } from "@/actions/items";
 import { Button } from "../ui/button";
 import NoteCard from "./card";
 import CreateNoteModal from "./create-note-modal";
 
-export interface Note {
-  id: string;
-  title: string;
-  description: string;
-  categoryId: string;
-  durationMinutes: number;
-  date: string;
-  tags?: string[];
-  topic: string;
-  difficulty: string;
-}
-
-export interface Category {
-  id: string;
-  name: string;
-  color: string;
-  icon: string;
-}
+export type NoteWithCategory = Item & { category: Category | null };
 
 const ItemList = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -74,7 +58,7 @@ const ItemList = () => {
     },
   });
 
-  const filteredNotes = notes.filter((note: Note) => {
+  const filteredNotes = notes.filter((note: NoteWithCategory) => {
     const matchesSearch =
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       note.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -134,11 +118,10 @@ const ItemList = () => {
             <button
               type="button"
               onClick={() => setSelectedCategory("All")}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
-                selectedCategory === "All"
-                  ? "bg-gray-900 text-white shadow-md"
-                  : "text-gray-500 hover:bg-gray-50"
-              }`}
+              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${selectedCategory === "All"
+                ? "bg-gray-900 text-white shadow-md"
+                : "text-gray-500 hover:bg-gray-50"
+                }`}
             >
               All Notes
             </button>
@@ -147,11 +130,10 @@ const ItemList = () => {
                 type="button"
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${
-                  selectedCategory === cat.id
-                    ? "bg-white text-gray-800 shadow-md ring-1 ring-gray-200"
-                    : "text-gray-500 hover:bg-gray-50"
-                }`}
+                className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${selectedCategory === cat.id
+                  ? "bg-white text-gray-800 shadow-md ring-1 ring-gray-200"
+                  : "text-gray-500 hover:bg-gray-50"
+                  }`}
               >
                 <div
                   className="w-2 h-2 rounded-full"
@@ -172,9 +154,6 @@ const ItemList = () => {
               <NoteCard
                 key={note.id}
                 note={note}
-                category={categories.find(
-                  (c: Category) => c.id === note.categoryId,
-                )}
                 onDelete={(e) => {
                   e.stopPropagation();
                   deleteMutation.mutate(note.id);
@@ -212,6 +191,7 @@ const ItemList = () => {
         onClose={() => setIsModalOpen(false)}
         categories={categories}
         onSubmit={(values) => addItemMutation.mutate(values)}
+        isPending={addItemMutation.isPending}
       />
     </div>
   );

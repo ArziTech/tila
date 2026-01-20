@@ -29,22 +29,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { Category } from "./list";
+import type { Category } from "@/generated/prisma/client";
 
 const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters." }),
   description: z.string().optional(),
   categoryId: z.string({ message: "Please select a category." }),
-  durationMinutes: z.coerce
-    .number()
-    .min(1, { message: "Duration must be at least 1 minute." }),
+  duration_minutes: z.number().min(1, { message: "Duration must be at least 1 minute." }),
   tags: z.string().optional(),
   topic: z.string().min(2, { message: "Topic must be at least 2 characters." }),
   difficulty: z.enum(["beginner", "intermediate", "advanced"]),
 });
 
-type TransformedFormValues = z.infer<typeof formSchema> & {
+type TransformedFormValues = Omit<z.infer<typeof formSchema>, "tags" | "description"> & {
   tags: string[];
+  description: string;
 };
 
 interface CreateNoteModalProps {
@@ -52,7 +51,7 @@ interface CreateNoteModalProps {
   onClose: () => void;
   onSubmit: (values: TransformedFormValues) => void;
   categories: Category[];
-  isPending: boolean;
+  isPending?: boolean;
 }
 
 const CreateNoteModal = ({
@@ -68,7 +67,7 @@ const CreateNoteModal = ({
       title: "",
       description: "",
       categoryId: "",
-      durationMinutes: 60,
+      duration_minutes: 60,
       tags: "",
       topic: "",
       difficulty: "intermediate",
@@ -78,6 +77,7 @@ const CreateNoteModal = ({
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     onSubmit({
       ...values,
+      description: values.description ?? "",
       tags:
         values.tags
           ?.split(",")
@@ -198,12 +198,17 @@ const CreateNoteModal = ({
             />
             <FormField
               control={form.control}
-              name="durationMinutes"
+              name="duration_minutes"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Duration (minutes)</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input
+                      type="number"
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -103,7 +103,7 @@ export default function ProfilePanel() {
     return <div>Error loading profile data.</div>;
   }
 
-  const { stats } = profileData.data;
+  const { stats } = profileData.data ?? {};
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -139,53 +139,57 @@ export default function ProfilePanel() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <StatBox title="Total Points" value={stats.totalPoints} icon="⭐" />
-        <StatBox
-          title="Current Streak"
-          value={stats.currentStreak}
-          icon="🔥"
-          suffix="days"
-        />
-        <StatBox
-          title="Longest Streak"
-          value={stats.longestStreak}
-          icon="🏆"
-          suffix="days"
-        />
-        <StatBox title="Total Learnings" value={stats.learnings} icon="📚" />
-      </div>
+      {stats && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <StatBox title="Total Points" value={stats.totalPoints} icon="⭐" />
+          <StatBox
+            title="Current Streak"
+            value={stats.currentStreak}
+            icon="🔥"
+            suffix="days"
+          />
+          <StatBox
+            title="Longest Streak"
+            value={stats.longestStreak}
+            icon="🏆"
+            suffix="days"
+          />
+          <StatBox title="Total Learnings" value={stats.learnings} icon="📚" />
+        </div>
+      )}
 
-      <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-        <h3 className="text-lg font-bold mb-4 text-primary">Learning Stats</h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Categories Explored</span>
-            <span className="font-semibold">{stats.uniqueCategories}</span>
-          </div>
-          <div className="border-t border-border" />
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Advanced Learnings</span>
-            <span className="font-semibold text-destructive">
-              {stats.advancedCount}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">
-              Intermediate Learnings
-            </span>
-            <span className="font-semibold text-secondary">
-              {stats.intermediateCount}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Beginner Learnings</span>
-            <span className="font-semibold text-success">
-              {stats.beginnerCount}
-            </span>
+      {stats && (
+        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+          <h3 className="text-lg font-bold mb-4 text-primary">Learning Stats</h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Categories Explored</span>
+              <span className="font-semibold">{stats.uniqueCategories}</span>
+            </div>
+            <div className="border-t border-border" />
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Advanced Learnings</span>
+              <span className="font-semibold text-destructive">
+                {stats.advancedCount}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">
+                Intermediate Learnings
+              </span>
+              <span className="font-semibold text-secondary">
+                {stats.intermediateCount}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Beginner Learnings</span>
+              <span className="font-semibold text-success">
+                {stats.beginnerCount}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

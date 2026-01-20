@@ -1,29 +1,38 @@
 import { Calendar, Clock, Trash2 } from "lucide-react";
 import Link from "next/link";
-import type { Category, Note } from "./list";
+import type { Category } from "@/generated/prisma/client";
+import type { NoteWithCategory } from "./list";
 
-interface Props {
-  note: Note;
-  category?: Category;
-  onDelete: (e: React.MouseEvent) => void;
+// Helper function to strip HTML tags and get plain text
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
 }
 
-const NoteCard = ({ note, category, onDelete }: Props) => {
+interface Props {
+  note: NoteWithCategory;
+  onDelete?: (e: React.MouseEvent) => void;
+}
+
+const NoteCard = ({ note, onDelete }: Props) => {
+  const category = note.category;
+
   return (
     <Link
       href={`/dashboard/items/${note.id}`}
       className="group relative bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer"
     >
-      <div className="absolute top-5 right-5 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-        <button
-          type="button"
-          onClick={onDelete}
-          className="p-1.5 bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition shadow-sm"
-          title="Delete Note"
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
+      {onDelete && (
+        <div className="absolute top-5 right-5 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <button
+            type="button"
+            onClick={onDelete}
+            className="p-1.5 bg-white border border-gray-200 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition shadow-sm"
+            title="Delete Note"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center gap-2 mb-3">
         {category && (
@@ -36,7 +45,7 @@ const NoteCard = ({ note, category, onDelete }: Props) => {
         )}
         <span className="text-xs text-gray-400 font-medium flex items-center gap-1">
           <Calendar size={12} />
-          {new Date(note.date).toLocaleDateString("en-US", {
+          {new Date(note.date_added).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
           })}
@@ -48,7 +57,7 @@ const NoteCard = ({ note, category, onDelete }: Props) => {
       </h3>
 
       <p className="text-sm text-gray-500 mb-4 line-clamp-3 leading-relaxed grow">
-        {note.description}
+        {stripHtml(note.description)}
       </p>
 
       <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
@@ -69,7 +78,7 @@ const NoteCard = ({ note, category, onDelete }: Props) => {
         </div>
         <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
           <Clock size={14} className="text-purple-400" />
-          {note.durationMinutes}m
+          {note.duration_minutes}m
         </div>
       </div>
     </Link>

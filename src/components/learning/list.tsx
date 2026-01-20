@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { getCategories } from "@/actions/categories";
 import { getItems } from "@/actions/items";
-import LearningCard from "./card";
+import NoteCard from "@/components/items/card";
 
 interface LearningListProps {
   recentOnly?: boolean;
@@ -99,7 +99,7 @@ export default function LearningList({
             </p>
           </div>
         ) : (
-          displayItems.map((item) => <LearningCard key={item.id} item={item} />)
+          displayItems.map((item) => <NoteCard key={item.id} note={item} />)
         )}
       </div>
     </div>

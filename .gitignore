@@ -42,5 +42,6 @@ next-env.d.ts
 
 /src/generated/prisma
 GEMINI.md
+CLAUDE.md
 supabase-project/
 supabase/

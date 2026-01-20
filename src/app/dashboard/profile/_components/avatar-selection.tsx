@@ -2,7 +2,7 @@
 
 import { AlertTriangle } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { updateUserProfile } from "@/actions/user";
 import { Button } from "@/components/ui/button";
@@ -15,27 +15,37 @@ export function AvatarSelection({ avatarOptions }: AvatarSelectionProps) {
   const { data: session, update } = useSession();
   const [isEditing, setIsEditing] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(session?.user?.image);
+  const [isPending, startTransition] = useTransition();
+  // Local optimistic state that updates immediately
+  const [optimisticAvatar, setOptimisticAvatar] = useState(session?.user?.image);
+
+  // Use optimistic avatar if available, otherwise fall back to session avatar
+  const currentAvatar = optimisticAvatar ?? session?.user?.image;
 
   const handleSave = async () => {
     if (session?.user?.id && selectedAvatar) {
-      const response = await updateUserProfile(session.user.id, {
-        image: selectedAvatar,
-      });
+      // Immediately update the UI
+      setOptimisticAvatar(selectedAvatar);
+      setIsEditing(false);
 
-      if (response.status === "SUCCESS") {
-        await update({
-          ...session,
-          user: { ...session.user, image: selectedAvatar },
+      // Update in background
+      startTransition(async () => {
+        const response = await updateUserProfile(session.user.id, {
+          image: selectedAvatar,
         });
-        setIsEditing(false);
-        toast.success("Avatar updated successfully!");
-      } else {
-        toast.error("Failed to update avatar.");
-      }
+
+        if (response.status === "SUCCESS") {
+          // Sync session with server
+          await update();
+          toast.success("Avatar updated successfully!");
+        } else {
+          // Revert on error
+          setOptimisticAvatar(session.user.image);
+          toast.error("Failed to update avatar.");
+        }
+      });
     }
   };
-
-  const currentAvatar = session?.user?.image;
 
   if (!currentAvatar && !isEditing) {
     return (
@@ -58,10 +68,7 @@ export function AvatarSelection({ avatarOptions }: AvatarSelectionProps) {
               variant="link"
               className="p-0 h-auto mt-1"
               type="button"
-              onClick={() => {
-                setIsEditing(true);
-                setSelectedAvatar(currentAvatar);
-              }}
+              onClick={() => setIsEditing(true)}
             >
               Choose Avatar
             </Button>
@@ -83,11 +90,10 @@ export function AvatarSelection({ avatarOptions }: AvatarSelectionProps) {
               type="button"
               key={avatar}
               onClick={() => setSelectedAvatar(avatar)}
-              className={`text-4xl p-3 rounded-lg border-2 transition ${
-                selectedAvatar === avatar
-                  ? "border-primary bg-primary/10"
-                  : "border-border hover:border-primary"
-              }`}
+              className={`text-4xl p-3 rounded-lg border-2 transition ${selectedAvatar === avatar
+                ? "border-primary bg-primary/10"
+                : "border-border hover:border-primary"
+                }`}
             >
               {avatar}
             </button>
@@ -97,9 +103,9 @@ export function AvatarSelection({ avatarOptions }: AvatarSelectionProps) {
           <Button
             type="button"
             onClick={handleSave}
-            disabled={selectedAvatar === currentAvatar}
+            disabled={selectedAvatar === currentAvatar || isPending}
           >
-            Save
+            {isPending ? "Saving..." : "Save"}
           </Button>
           <Button
             type="button"
@@ -108,6 +114,7 @@ export function AvatarSelection({ avatarOptions }: AvatarSelectionProps) {
               setIsEditing(false);
               setSelectedAvatar(currentAvatar);
             }}
+            disabled={isPending}
           >
             Cancel
           </Button>
@@ -126,10 +133,8 @@ export function AvatarSelection({ avatarOptions }: AvatarSelectionProps) {
         <Button
           type="button"
           variant="outline"
-          onClick={() => {
-            setIsEditing(true);
-            setSelectedAvatar(currentAvatar);
-          }}
+          onClick={() => setIsEditing(true)}
+          disabled={isPending}
         >
           Change
         </Button>
