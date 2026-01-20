@@ -1,26 +1,38 @@
 "use client";
 
-import { type LearningItem, useLearning } from "@/context/learning-context";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import type { Category, Item } from "@/generated/prisma";
 
 interface LearningCardProps {
-  item: LearningItem;
+  item: Item & { category: Category };
 }
 
-export default function LearningCard({ item }: LearningCardProps) {
-  const { deleteItem, categories } = useLearning();
-  const category = categories.find((c) => c.id === item.category.id);
+const deleteItem = async (id: string) => {
+  await axios.delete(`/api/items/${id}`);
+};
 
-  const difficultyColors = {
+export default function LearningCard({ item }: LearningCardProps) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: deleteItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["items"] });
+    },
+  });
+
+  const difficultyColors: { [key: string]: string } = {
     beginner: "bg-success/20 text-success",
     intermediate: "bg-secondary/20 text-secondary",
     advanced: "bg-destructive/20 text-destructive",
   };
 
-  const getDaysSince = (date: string) => {
-    const today = new Date().toISOString().split("T")[0];
+  const getDaysSince = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const days = Math.floor(
-      (new Date(today).getTime() - new Date(date).getTime()) /
-        (1000 * 60 * 60 * 24),
+      (today.getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24),
     );
     return days === 0 ? "Today" : days === 1 ? "Yesterday" : `${days} days ago`;
   };
@@ -32,7 +44,8 @@ export default function LearningCard({ item }: LearningCardProps) {
           {item.title}
         </h3>
         <button
-          onClick={() => deleteItem(item.id)}
+          type="button"
+          onClick={() => mutation.mutate(item.id)}
           className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition text-lg ml-2"
         >
           ✕
@@ -46,12 +59,14 @@ export default function LearningCard({ item }: LearningCardProps) {
       <div className="flex flex-wrap gap-2 mb-3">
         <span
           className="inline-block px-3 py-1 rounded-full text-xs font-medium text-card-foreground"
-          style={{ backgroundColor: category?.color || "#FFB3E6" }}
+          style={{ backgroundColor: item.category?.color || "#FFB3E6" }}
         >
-          {category?.name}
+          {item.category?.name}
         </span>
         <span
-          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${difficultyColors[item.difficulty]}`}
+          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+            difficultyColors[item.difficulty]
+          }`}
         >
           {item.difficulty}
         </span>
@@ -69,7 +84,7 @@ export default function LearningCard({ item }: LearningCardProps) {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        {getDaysSince(item.dateAdded)}
+        {getDaysSince(item.date_added)}
       </p>
     </div>
   );

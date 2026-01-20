@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
   const supabase = await createClient();
@@ -33,13 +33,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Ensure a profile exists for the user
+  const profile = await prisma.profile.upsert({
+    where: { id: user.id },
+    update: {},
+    create: {
+      id: user.id,
+      username: user.email?.split("@")[0] || "New User", // Default username
+      avatar_url: "😊", // Default avatar
+    },
+  });
+
   const { name, color } = await request.json();
 
   const category = await prisma.category.create({
     data: {
       name,
       color,
-      profileId: user.id,
+      profileId: profile.id,
     },
   });
 

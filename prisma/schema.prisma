@@ -20,7 +20,6 @@ model Profile {
   items       Item[]
   todos       Todo[]
   categories  Category[]
-  user        User     @relation(fields: [id], references: [id])
 }
 
 model Category {
@@ -48,15 +47,12 @@ model Item {
 }
 
 model Todo {
-  id          String   @id @default(uuid())
-  title       String
-  completed   Boolean  @default(false)
-  profile     Profile  @relation(fields: [profileId], references: [id])
-  profileId   String
-}
-
-model User {
-  id      String   @id @default(uuid())
-  email   String   @unique
-  profile Profile?
+  id                String   @id @default(uuid())
+  title             String
+  completed         Boolean  @default(false)
+  profile           Profile  @relation(fields: [profileId], references: [id])
+  profileId         String
+  priority          Int      @default(3)
+  estimatedDuration Int?
+  categoryId        String?
 }

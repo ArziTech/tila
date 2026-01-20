@@ -12,8 +12,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Ensure a profile exists for the user
-  const _profile = await prisma.profile.upsert({
+  const profile = await prisma.profile.upsert({
     where: { id: user.id },
     update: {},
     create: {
@@ -25,8 +24,26 @@ export async function GET() {
 
   const items = await prisma.item.findMany({
     where: { profileId: user.id },
-    include: { category: true },
   });
 
-  return NextResponse.json(items);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const todayHours =
+    items
+      .filter((item) => new Date(item.date_added) >= today)
+      .reduce((acc, item) => acc + item.duration_minutes, 0) / 60;
+
+  const totalHours =
+    items.reduce((acc, item) => acc + item.duration_minutes, 0) / 60;
+
+  const stats = {
+    currentStreak: profile?.current_streak || 0,
+    todayHours,
+    totalHours,
+    totalLogs: items.length,
+    level: Math.floor((profile?.total_points || 0) / 1000),
+  };
+
+  return NextResponse.json({ profile, items, stats });
 }

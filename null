@@ -1,0 +1,8 @@
+// The previous migrate dev failed because `User` model was still referenced in `Profile`
+// The migration failed with an error: "The relation field `profile` on model `User` is missing an opposite relation field on the model `Profile`".
+
+// This error is happening because I removed the `User` model, but I didn't remove the `User` model from the `Todo` and `Item` relations.
+
+// I need to remove the `user` relation from `Profile` model (which I already did), and from `Todo` and `Item` models. The `Profile` model's `id` should be the user's `id`.
+
+// I will read the `prisma/schema.prisma` file again.

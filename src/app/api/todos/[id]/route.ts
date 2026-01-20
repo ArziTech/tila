@@ -1,25 +1,26 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function GET(
-  _request: Request,
+export async function PUT(
+  request: Request,
   { params }: { params: { id: string } },
 ) {
   const { id } = params;
-  const item = await prisma.item.findUnique({
+  const { completed } = await request.json();
+  const todo = await prisma.todo.update({
     where: { id },
-    include: { category: true },
+    data: { completed },
   });
-  return NextResponse.json(item);
+  return NextResponse.json(todo);
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: { id: string } },
 ) {
   const { id } = params;
-  await prisma.item.delete({
+  await prisma.todo.delete({
     where: { id },
   });
-  return NextResponse.json({ message: "Item deleted" });
+  return NextResponse.json({ message: "Todo deleted" });
 }

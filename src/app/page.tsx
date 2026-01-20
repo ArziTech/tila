@@ -1,3 +1,6 @@
+"use client";
+
+import type { User } from "@supabase/supabase-js";
 import {
   ArrowRight,
   Brain,
@@ -9,9 +12,11 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import type { Profile } from "@/generated/prisma/client";
+import { createClient } from "@/lib/supabase/client";
 
 type FeatureCardProps = {
   icon: React.ElementType;
@@ -37,11 +42,37 @@ const FeatureCard = ({
   </div>
 );
 
-// ============================================================================
-// MAIN LANDING PAGE
-// ============================================================================
-
 export default function LandingPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+
+      if (user) {
+        console.log({ user });
+        const { data: profileData, error } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", user.id)
+          .single();
+
+        if (!error && profileData) {
+          setProfile(profileData as Profile);
+        }
+      }
+      setLoading(false);
+    };
+
+    getUser();
+  }, [supabase]);
+
   return (
     <div className="min-h-screen bg-[#F8F9FC] font-sans text-slate-800 overflow-x-hidden selection:bg-purple-200">
       {/* --- NAVBAR --- */}
@@ -65,9 +96,24 @@ export default function LandingPage() {
             Pricing
           </a>
         </div>
-        <Button variant={"gradient"}>
-          <Link href="/login">Sign In</Link>
-        </Button>
+        {loading ? (
+          <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+        ) : user ? (
+          <Button variant={"gradient"} asChild>
+            <Link href="/dashboard">
+              Hi {profile?.username || "there"}, Go to Dashboard
+            </Link>
+          </Button>
+        ) : (
+          <div className="flex gap-4">
+            <Button variant={"outline"} asChild>
+              <Link href="/login">Sign In</Link>
+            </Button>
+            <Button variant={"gradient"} asChild>
+              <Link href="/register">Register</Link>
+            </Button>
+          </div>
+        )}
       </nav>
 
       {/* --- HERO SECTION --- */}

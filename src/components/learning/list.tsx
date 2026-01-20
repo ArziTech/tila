@@ -1,7 +1,9 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import { useState } from "react";
-import { useLearning } from "@/context/learning-context";
+import type { Category, Item } from "@/generated/prisma";
 import LearningCard from "./card";
 
 interface LearningListProps {
@@ -9,13 +11,36 @@ interface LearningListProps {
   limit?: number;
 }
 
+const fetchItems = async () => {
+  const { data } = await axios.get("/api/items");
+  return data;
+};
+
+const fetchCategories = async () => {
+  const { data } = await axios.get("/api/categories");
+  return data;
+};
+
 export default function LearningList({
   recentOnly = false,
   limit,
 }: LearningListProps) {
-  const { items, categories } = useLearning();
   const [filterCategory, setFilterCategory] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const { data: items = [], isLoading: areItemsLoading } = useQuery<
+    (Item & { category: Category })[]
+  >({
+    queryKey: ["items"],
+    queryFn: fetchItems,
+  });
+
+  const { data: categories = [], isLoading: areCategoriesLoading } = useQuery<
+    Category[]
+  >({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+  });
 
   let displayItems = items;
 
@@ -25,7 +50,7 @@ export default function LearningList({
 
   if (filterCategory) {
     displayItems = displayItems.filter(
-      (item) => item.category.id === filterCategory,
+      (item) => item.categoryId === filterCategory,
     );
   }
 
@@ -36,6 +61,10 @@ export default function LearningList({
         item.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.description.toLowerCase().includes(searchQuery.toLowerCase()),
     );
+  }
+
+  if (areItemsLoading || areCategoriesLoading) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -81,7 +110,9 @@ export default function LearningList({
             </p>
           </div>
         ) : (
-          displayItems.map((item) => <LearningCard key={item.id} item={item} />)
+          displayItems.map((item) => (
+            <LearningCard key={item.id} item={item} categories={categories} />
+          ))
         )}
       </div>
     </div>

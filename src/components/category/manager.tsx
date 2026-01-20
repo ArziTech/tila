@@ -3,7 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as z from "zod";
 import { Button } from "../ui/button";
 import {
@@ -52,8 +54,13 @@ export default function CategoryManager() {
 
   const mutation = useMutation({
     mutationFn: addCategory,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast.success(`Category "${data.name}" added successfully!`);
+    },
+    onError: (error) => {
+      toast.error("Failed to add category.");
+      console.error(error);
     },
   });
 
@@ -84,7 +91,7 @@ export default function CategoryManager() {
   }
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Loading categories...</div>;
   }
 
   return (
@@ -136,7 +143,14 @@ export default function CategoryManager() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Add Category
             </Button>
           </form>
@@ -144,28 +158,35 @@ export default function CategoryManager() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {categories.map((category) => {
-          const itemCount = category._count.items;
-          return (
-            <div
-              key={category.id}
-              className="bg-card rounded-xl border border-border p-5 shadow-sm"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <div
-                  className="w-8 h-8 rounded-lg"
-                  style={{ backgroundColor: category.color }}
-                />
-                <h3 className="font-semibold text-foreground">
-                  {category.name}
-                </h3>
+        {categories.length === 0 ? (
+          <div className="col-span-full text-center py-12 text-muted-foreground">
+            <p className="text-lg font-semibold mb-2">No categories yet!</p>
+            <p>Start by adding your first learning category.</p>
+          </div>
+        ) : (
+          categories.map((category) => {
+            const itemCount = category._count.items;
+            return (
+              <div
+                key={category.id}
+                className="bg-card rounded-xl border border-border p-5 shadow-sm"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div
+                    className="w-8 h-8 rounded-lg"
+                    style={{ backgroundColor: category.color }}
+                  />
+                  <h3 className="font-semibold text-foreground">
+                    {category.name}
+                  </h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {itemCount} {itemCount === 1 ? "learning" : "learnings"}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {itemCount} {itemCount === 1 ? "learning" : "learnings"}
-              </p>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );

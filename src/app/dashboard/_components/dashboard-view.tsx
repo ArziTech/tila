@@ -1,33 +1,25 @@
 "use client";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Award, BookOpen, Clock, Flame } from "lucide-react";
-import { useLearning } from "@/context/learning-context";
-import LearningList from "@/components/learning/list";
-import type { DashboardStats } from "@/types";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useState } from "react";
+import LearningList from "@/components/learning/list";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import type { Item, Profile } from "@/generated/prisma/client";
+import type { DashboardStats } from "@/types";
 
 interface Props {
-  user: any;
+  user: Profile;
+  items: Item[];
+  stats: DashboardStats;
 }
 
-const DashboardView = ({ user }: Props) => {
-  const { items } = useLearning();
-
-  const [stats, _setStats] = useState<DashboardStats>({
-    currentStreak: 0,
-    todayHours: 0,
-    totalHours: 0,
-    totalLogs: 0,
-    level: 1,
-  });
+const DashboardView = ({ user, items, stats }: Props) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            Welcome back, {user?.displayName}! 👋
+            Welcome back, {user?.username}! 👋
           </h2>
           <p className="text-gray-500">
             You've been consistent! Keep up the good work.
