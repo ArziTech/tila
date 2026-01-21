@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "highlight.js/styles/github-dark.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -122,4 +123,30 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Novel editor color variables */
+:root {
+  --novel-black: #000000;
+  --novel-highlight-default: transparent;
+  --novel-highlight-purple: #f3e8ff;
+  --novel-highlight-red: #fee2e2;
+  --novel-highlight-yellow: #fef9c3;
+  --novel-highlight-blue: #dbeafe;
+  --novel-highlight-green: #dcfce7;
+  --novel-highlight-orange: #ffedd5;
+  --novel-highlight-pink: #fce7f3;
+  --novel-highlight-gray: #f3f4f6;
+}
+
+.dark {
+  --novel-black: #ffffff;
+  --novel-highlight-purple: #581c87;
+  --novel-highlight-red: #7f1d1d;
+  --novel-highlight-yellow: #713f12;
+  --novel-highlight-blue: #1e3a8a;
+  --novel-highlight-green: #14532d;
+  --novel-highlight-orange: #7c2d12;
+  --novel-highlight-pink: #831843;
+  --novel-highlight-gray: #374151;
 }

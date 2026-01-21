@@ -27,7 +27,7 @@ export function EmptyState({
         <p className="text-gray-500 mb-6">{description}</p>
         {actionHref && (
           <Button variant="gradient" asChild>
-            <Link href={actionHref}>
+            <Link href={actionHref as any}>
               {actionIcon}
               {actionLabel}
             </Link>

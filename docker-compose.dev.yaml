@@ -12,25 +12,25 @@ services:
     volumes:
       - tila_dev_data:/var/lib/postgresql/data
 
-  app:
-    container_name: tila-dev
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    ports:
-      - "3000:3000"
-    environment:
-      - ALLOW_UNVERIFIED_USER=true
-      - DATABASE_URL=postgresql://postgres:devonly@postgres:5432/postgres?schema=public
-      - NEXTAUTH_URL=http://localhost:3000
-      - NEXTAUTH_SECRET=dev-secret-change-in-production
-    depends_on:
-      - postgres
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
-    restart: unless-stopped
+  # app:
+  #   container_name: tila-dev
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.dev
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - ALLOW_UNVERIFIED_USER=true
+  #     - DATABASE_URL=postgresql://postgres:devonly@postgres:5432/postgres?schema=public
+  #     - NEXTAUTH_URL=http://localhost:3000
+  #     - NEXTAUTH_SECRET=dev-secret-change-in-production
+  #   depends_on:
+  #     - postgres
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #     - /app/.next
+  #   restart: unless-stopped
 
 volumes:
   tila_dev_data:
