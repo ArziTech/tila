@@ -1,0 +1,71 @@
+# Development Dockerfile for TILA
+# This Dockerfile is optimized for development with hot-reload and debugging
+
+# Stage 1: Dependencies
+FROM node:20-alpine AS deps
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+# Install Bun as package manager
+RUN npm install -g bun
+
+# Copy package files
+COPY package.json bun.lock* ./
+
+# Install dependencies
+RUN bun install --frozen-lockfile
+
+# Stage 2: Builder
+FROM node:20-alpine AS builder
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Install Bun
+RUN npm install -g bun
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Generate Prisma Client
+RUN bunx --bun prisma generate
+
+# Build the application (for production, but we'll use dev mode)
+# This also validates that the build works
+RUN bun run build
+
+# Stage 3: Development
+FROM node:20-alpine AS development
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+# Install Bun
+RUN npm install -g bun
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy built application (optional, for hybrid dev/prod mode)
+# COPY --from=builder /app/.next ./.next
+# COPY --from=builder /app/public ./public
+
+# Copy Prisma schema and generated client
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/src/generated ./src/generated
+
+# Copy source files for hot-reload
+COPY . .
+
+# Expose development port
+EXPOSE 3000
+
+# Set environment to development
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Start development server with hot-reload
+# --turbo: Use Turbopack for faster builds (Next.js 13+)
+# --hostname: Bind to all interfaces for Docker network access
+CMD ["bun", "run", "dev", "--hostname", "0.0.0.0"]
