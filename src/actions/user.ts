@@ -99,7 +99,7 @@ export async function setUsername(
 
 export async function updateUserProfile(
   userId: string,
-  data: { username?: string; image?: string },
+  data: { name?: string; username?: string; image?: string; email?: string },
 ): Promise<ActionResponse<User>> {
   try {
     const user = await prisma.user.update({

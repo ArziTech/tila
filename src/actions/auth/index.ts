@@ -1,11 +1,16 @@
 "use server";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 import type zod from "zod";
 import { signIn, signOut } from "@/auth";
 import { loginSchema, registerSchema } from "@/lib/schemas/auth";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import type { ActionResponse } from "@/types/utils";
 import { createUser, getUserByEmail } from "../user";
+import {
+  isEmailVerificationRequired,
+  sendVerificationEmail,
+} from "@/lib/email";
 
 export const login = async (
   values: zod.infer<typeof loginSchema>,
@@ -39,15 +44,11 @@ export const login = async (
   //   };
   // }
 
-  try {
-    await signIn("credentials", {
-      email,
-      password,
-      redirectTo: DEFAULT_LOGIN_REDIRECT,
-    });
-  } catch (error) {
-    throw error;
-  }
+  await signIn("credentials", {
+    email,
+    password,
+    redirectTo: DEFAULT_LOGIN_REDIRECT,
+  });
 
   return { success: "SignIn Succces Welcome Back" };
 };
@@ -71,41 +72,63 @@ export const registerAction = async (
       return { status: "ERROR", error: "Email already used" };
     }
 
-    // const codeResponse = await getVerificationTokensByEmail(email);
-    // if (codeResponse.status === "ERROR" || !codeResponse.data) {
-    //   return { status: "ERROR", error: "Problem with code" };
-    // }
+    const verificationRequired = isEmailVerificationRequired();
 
-    // const newestCode = codeResponse.data[0];
-    // if (code !== newestCode.token) {
-    //   return { status: "ERROR", error: "Code doesn't match" };
-    // }
+    // Generate verification token (only if verification is required)
+    const verificationToken = verificationRequired
+      ? crypto.randomBytes(32).toString("hex")
+      : null;
+    const verificationTokenExpires = verificationRequired
+      ? new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+      : null;
+    const emailVerified = verificationRequired ? null : new Date();
 
-    // const currentTime = new Date();
-    // const expirationTime = new Date(newestCode.expires);
-
-    // if (currentTime > expirationTime) {
-    //   return { status: "ERROR", error: "Code has expired" };
-    // }
-
-    await createUser({
+    // Create user with verification token or auto-verified
+    const userResponse = await createUser({
       name,
       username: name,
       email,
       password: hashedPassword,
+      verificationToken,
+      verificationTokenExpires,
+      emailVerified,
     });
 
-    // await deleteVerificationTokensByEmail(email);
+    if (userResponse.status === "ERROR" || !userResponse.data) {
+      return {
+        status: "ERROR",
+        error: "Failed to create user account",
+      };
+    }
+
+    // Send verification email only if verification is required
+    if (verificationRequired) {
+      const emailResult = await sendVerificationEmail({
+        email,
+        token: verificationToken!,
+      });
+
+      if (!emailResult.success) {
+        console.error("Failed to send verification email:", emailResult.error);
+        // Don't fail registration if email fails, just log it
+      }
+
+      return {
+        status: "SUCCESS",
+        success:
+          "Account created successfully! Please check your email to verify your account.",
+      };
+    }
 
     return {
       status: "SUCCESS",
-      success: `Congratulations!!! Your Account has successfully created.`,
+      success: "Account created successfully! You can now log in.",
     };
-  } catch {
-    // just in case
+  } catch (error) {
+    console.error("Registration error:", error);
     return {
       status: "ERROR",
-      success: `Something went wrong`,
+      error: "Something went wrong during registration",
     };
   }
 };

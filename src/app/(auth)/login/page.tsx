@@ -1,10 +1,16 @@
 import { LoginForm } from "./_components/login-form";
 
-export default function LoginPage({
+
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const error = searchParams?.error as string | undefined;
-  return <LoginForm error={error} />;
+  const params = await searchParams;
+  const error = params?.error as string | undefined;
+  const verified = params?.verified === "true";
+
+  return (
+    <LoginForm error={error} verified={verified} />
+  )
 }

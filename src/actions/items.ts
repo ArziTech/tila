@@ -96,6 +96,14 @@ export async function addItem(
       return { status: "ERROR", error: "Unauthorized" };
     }
 
+    // Check email verification
+    if (!session.user.emailVerified) {
+      return {
+        status: "ERROR",
+        error: "Please verify your email address before creating items",
+      };
+    }
+
     const {
       title,
       description,

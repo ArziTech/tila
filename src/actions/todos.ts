@@ -76,6 +76,14 @@ export async function addTodo(
       return { status: "ERROR", error: "Unauthorized" };
     }
 
+    // Check email verification
+    if (!session.user.emailVerified) {
+      return {
+        status: "ERROR",
+        error: "Please verify your email address before creating todos",
+      };
+    }
+
     const { title, content, categoryId, priority, dueDate, estimatedDuration } =
       values;
 

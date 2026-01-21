@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -13,17 +11,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
           <h1 className="text-4xl font-bold text-gray-800 mb-2">TILA</h1>
           <p className="text-gray-500">Today I've Learned About</p>
         </div>
-        <Tabs defaultValue="register" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login" asChild>
-              <Link href="/login">Login</Link>
-            </TabsTrigger>
 
-            <TabsTrigger value="register" asChild>
-              <Link href="/register">Register</Link>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
         {children}
       </Card>
     </div>

@@ -559,7 +559,6 @@ const TodosView = () => {
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
-        disabled={!isDragEnabled}
       >
         <SortableContext
           items={filteredTodos.map((t) => t.id)}
