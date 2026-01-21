@@ -1,4 +1,5 @@
 import {
+  Award,
   BarChart2,
   CheckCircle,
   FileText,
@@ -12,6 +13,7 @@ export const Views = [
   { id: "/dashboard/items", icon: CheckCircle, label: "Items" },
   { id: "/dashboard/todos", icon: ListTodo, label: "To-Do" },
   { id: "/dashboard/categories", icon: FileText, label: "Categories" },
+  { id: "/dashboard/badges", icon: Award, label: "Badges" },
   { id: "/dashboard/stats", icon: BarChart2, label: "Stats" },
   { id: "/dashboard/profile", icon: User, label: "Profile" },
 ] as const;

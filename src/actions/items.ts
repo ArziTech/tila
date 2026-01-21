@@ -11,6 +11,7 @@ import {
   POINTS,
   updateCategoryCount,
 } from "@/lib/gamification";
+import { evaluateUserBadges } from "@/lib/badges/evaluator";
 
 export async function getItems(): Promise<
   ActionResponse<(Item & { category: Category | null })[]>
@@ -228,6 +229,9 @@ export async function completeItem(
 
     // Award completion rewards (points, streak, difficulty count, category count)
     await awardCompletionRewards(session.user.id, item.difficulty);
+
+    // Check for new badges after item completion
+    await evaluateUserBadges(session.user.id);
 
     return {
       status: "SUCCESS",

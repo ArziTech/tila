@@ -6,6 +6,9 @@ import { ActivityChart } from "./activity-chart";
 import { StatsGrid } from "@/components/dashboard/stats-grid";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { Button } from "@/components/ui/button";
+import { BadgeBanner } from "@/components/badges/badge-banner";
+import { BadgeNotification } from "@/components/badges/badge-notification";
+import { useBadgeChecker } from "@/components/badges/use-badge-checker";
 import type { User } from "@/generated/prisma/client";
 import { getDashboardData } from "@/actions/dashboard";
 
@@ -18,6 +21,9 @@ const DashboardView = ({ user }: Props) => {
     queryKey: ["dashboard", user.id],
     queryFn: () => getDashboardData(user.id),
   });
+
+  // Check for new badges on mount
+  const { awardedBadges, totalPointsEarned } = useBadgeChecker();
 
   // Show loading state
   if (isLoading) {
@@ -63,6 +69,12 @@ const DashboardView = ({ user }: Props) => {
   if (items.length === 0) {
     return (
       <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+        {/* Badge Banner - Shows recent earned badges */}
+        <BadgeBanner />
+
+        {/* Badge Notification - Toast notifications for new badges */}
+        <BadgeNotification awardedBadges={[]} totalPointsEarned={0} />
+
         <div className="flex justify-between items-end">
           <div>
             <h2 className="text-3xl font-bold text-gray-800 mb-2">
@@ -97,6 +109,12 @@ const DashboardView = ({ user }: Props) => {
 
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+      {/* Badge Banner - Shows recent earned badges */}
+      <BadgeBanner />
+
+      {/* Badge Notification - Toast notifications for new badges */}
+      <BadgeNotification awardedBadges={awardedBadges} totalPointsEarned={totalPointsEarned} />
+
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-bold text-gray-800 mb-2">

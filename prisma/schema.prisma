@@ -17,6 +17,15 @@ enum TodoStatus {
   CANCELED
   CONTINUE_LATER
 }
+
+enum BadgeCategory {
+  MILESTONES
+  STREAKS
+  POINTS
+  DIVERSITY
+  DIFFICULTY
+  SPECIAL
+}
 model Account {
   id                       String  @id @default(cuid())
   userId                   String  @unique
@@ -61,6 +70,7 @@ model User {
   categories   Category[]
   dailyActivities DailyActivity[]
   accounts     Account[]
+  earnedBadges UserBadge[]
 
   emailVerified            DateTime?
   verificationToken        String?  @unique
@@ -133,4 +143,35 @@ model DailyActivity {
   @@unique([userId, date])
   @@index([userId])
   @@index([date])
+}
+
+model Badge {
+  id          String       @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  category    BadgeCategory
+  criteria    Json
+  points      Int          @default(0)
+  createdAt   DateTime     @default(now())
+
+  earnedBadges UserBadge[]
+
+  @@index([category])
+  @@index([points])
+}
+
+model UserBadge {
+  id          String   @id @default(cuid())
+  userId      String
+  badgeId     String
+  earnedAt    DateTime @default(now())
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge   Badge  @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([earnedAt])
+  @@index([userId, earnedAt])
 }

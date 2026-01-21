@@ -1,7 +1,7 @@
 "use client";
 import { LogOut, Menu, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { signOutAction } from "@/actions/auth/index";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import { Views } from "@/types";
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const currentView = usePathname();
-  const _router = useRouter();
 
   return (
     <aside

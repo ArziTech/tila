@@ -20,6 +20,7 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - ALLOW_UNVERIFIED_USER=true
       - DATABASE_URL=postgresql://postgres:devonly@postgres:5432/postgres?schema=public
       - NEXTAUTH_URL=http://localhost:3000
       - NEXTAUTH_SECRET=dev-secret-change-in-production
