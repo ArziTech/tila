@@ -58,24 +58,29 @@ function calculateLearningStats(user: User, items: Item[]) {
 /**
  * Fetches all necessary data for the user's dashboard.
  * This includes user details, their learning items, and calculated learning statistics.
+ * @param userId Optional user ID. If not provided, will use session user ID.
  * @returns An ActionResponse containing the dashboard data or an error message.
  */
-export async function getDashboardData(): Promise<
+export async function getDashboardData(userId?: string): Promise<
   ActionResponse<DashboardData>
 > {
   try {
-    // 1. Authenticate the user session using NextAuth.
-    const session = await auth();
+    // 1. Get the user ID - either from parameter or session
+    let targetUserId = userId;
+    if (!targetUserId) {
+      const session = await auth();
+      targetUserId = session?.user?.id;
+    }
 
     // 2. Check if the user is authenticated and has an ID.
-    if (!session?.user?.id) {
+    if (!targetUserId) {
       return { status: "ERROR", error: "Unauthorized" };
     }
 
-    // 3. Fetch detailed user information from the database using their session ID.
+    // 3. Fetch detailed user information from the database using their ID.
     // This includes profile-specific data like streaks and total points.
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: targetUserId },
     });
 
     // 4. Handle case where user is not found in the database.

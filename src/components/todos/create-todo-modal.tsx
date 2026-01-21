@@ -34,7 +34,7 @@ const formSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters." }),
   content: z.string().optional(),
   categoryId: z.string().optional(),
-  priority: z.number().min(1).max(3).default(3),
+  priority: z.number().min(1).max(3),
   dueDate: z.string().optional(),
   estimatedDuration: z.number().min(1).optional(),
 });

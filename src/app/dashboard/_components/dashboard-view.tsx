@@ -1,22 +1,100 @@
 "use client";
-import { Award, BookOpen, Clock, Flame } from "lucide-react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import LearningList from "@/components/learning/list";
 import { ActivityChart } from "./activity-chart";
+import { StatsGrid } from "@/components/dashboard/stats-grid";
+import { EmptyState } from "@/components/dashboard/empty-state";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import type { Item, User } from "@/generated/prisma/client";
-import type { DashboardStats } from "@/types";
-import type { DailyActivity } from "@/actions/dashboard";
+import type { User } from "@/generated/prisma/client";
+import { getDashboardData } from "@/actions/dashboard";
 
 interface Props {
   user: User;
-  items: Item[];
-  stats: DashboardStats;
-  dailyActivity: DailyActivity[];
 }
 
-const DashboardView = ({ user, items, stats, dailyActivity }: Props) => {
+const DashboardView = ({ user }: Props) => {
+  const { data: dashboardResponse, isLoading } = useQuery({
+    queryKey: ["dashboard", user.id],
+    queryFn: () => getDashboardData(user.id),
+  });
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+        <div className="flex justify-between items-end">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">
+              Loading...
+            </h2>
+          </div>
+        </div>
+        <StatsGrid stats={{
+          currentStreak: 0,
+          todayHours: 0,
+          totalHours: 0,
+          totalLogs: 0,
+          level: 0,
+        }} isLoading={true} />
+        <div className="h-75 bg-gray-100 rounded-lg animate-pulse" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="h-100 bg-gray-100 rounded-lg animate-pulse lg:col-span-2" />
+          <div className="h-50 bg-gray-100 rounded-lg animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (dashboardResponse?.status === "ERROR" || !dashboardResponse?.data) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500 text-lg">
+          Error: {dashboardResponse?.error || "Unknown error"}
+        </p>
+      </div>
+    );
+  }
+
+  const { items, stats, dailyActivity } = dashboardResponse.data;
+
+  // Show empty state when no learning items
+  if (items.length === 0) {
+    return (
+      <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+        <div className="flex justify-between items-end">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">
+              Welcome, {user?.username}! 👋
+            </h2>
+            <p className="text-gray-500">
+              Ready to start your learning journey?
+            </p>
+          </div>
+          <div className="text-right hidden md:block">
+            <p className="text-sm font-medium text-gray-400">
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+          </div>
+        </div>
+
+        <StatsGrid stats={stats} />
+
+        <EmptyState
+          title="No learning items yet"
+          description="Start by adding your first learning goal to track your progress"
+          actionHref="/dashboard/items"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-between items-end">
@@ -41,82 +119,7 @@ const DashboardView = ({ user, items, stats, dailyActivity }: Props) => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="flex flex-col justify-between hover:shadow-md transition">
-          <CardHeader>
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-orange-50 rounded-2xl">
-                <Flame className="text-orange-500" size={24} />
-              </div>
-              <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                Active
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div>
-              <p className="text-3xl font-bold text-gray-800">
-                {stats.currentStreak}
-              </p>
-              <p className="text-sm text-gray-500">Day Streak</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="flex flex-col justify-between hover:shadow-md transition">
-          <CardHeader>
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-blue-50 rounded-2xl">
-                <Clock className="text-blue-500" size={24} />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div>
-              <p className="text-3xl font-bold text-gray-800">
-                {stats.todayHours.toFixed(1)}h
-              </p>
-              <p className="text-sm text-gray-500">Learned Today</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="flex flex-col justify-between hover:shadow-md transition">
-          <CardHeader>
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-purple-50 rounded-2xl">
-                <BookOpen className="text-purple-500" size={24} />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div>
-              <p className="text-3xl font-bold text-gray-800">
-                {stats.totalHours.toFixed(0)}h
-              </p>
-              <p className="text-sm text-gray-500">Total Hours</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="flex flex-col justify-between hover:shadow-md transition">
-          <CardHeader>
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-pink-50 rounded-2xl">
-                <Award className="text-pink-500" size={24} />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div>
-              <p className="text-3xl font-bold text-gray-800">
-                Lvl {stats.level}
-              </p>
-              <p className="text-sm text-gray-500">Current Level</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <StatsGrid stats={stats} />
 
       {/* Activity Chart */}
       <ActivityChart dailyActivity={dailyActivity} />
@@ -131,7 +134,7 @@ const DashboardView = ({ user, items, stats, dailyActivity }: Props) => {
             <h3 className="text-lg font-semibold mb-4 text-primary">
               Quick Add
             </h3>
-            <Button variant="gradient" onClick={() => {}} className="w-full">
+            <Button variant="gradient" onClick={() => { }} className="w-full">
               + Add Learning
             </Button>
             <Button variant={"outline"} className="w-full mt-2" asChild>

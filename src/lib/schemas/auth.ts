@@ -11,8 +11,8 @@ export const registerSchema = z
     email: z.string().email(),
     password: z.string().min(8),
     confirmPassword: z.string(),
-    termsAgreed: z.literal(true, {
-      errorMap: () => ({ message: "You must agree to the terms and conditions" }),
+    termsAgreed: z.boolean().refine((val) => val === true, {
+      message: "You must agree to the terms and conditions",
     }),
     // code: z.string(),
   })
