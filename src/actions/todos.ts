@@ -4,6 +4,11 @@ import { auth } from "@/auth";
 import type { Category, Todo, TodoStatus } from "@/generated/prisma/client";
 import prisma from "@/lib/prisma";
 import type { ActionResponse } from "@/types/utils";
+import {
+  POINTS,
+  awardCompletionRewards,
+  checkAndUpdateDailyStreak,
+} from "@/lib/gamification";
 
 export async function getTodos(): Promise<
   ActionResponse<(Todo & { category: Category | null })[]>
@@ -108,6 +113,9 @@ export async function addTodo(
         userId: session.user.id,
       },
     });
+
+    // Update streak to maintain daily activity tracking
+    await checkAndUpdateDailyStreak(session.user.id);
 
     return {
       status: "SUCCESS",
@@ -223,14 +231,31 @@ export async function completeTodo(
       return { status: "ERROR", error: "Todo not found" };
     }
 
-    // Update todo as completed
-    const todo = await prisma.todo.update({
-      where: { id, userId: session.user.id },
-      data: {
-        status: "COMPLETED",
-        completedAt: new Date(),
-      },
+    // Update todo as completed and award points in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      const todo = await tx.todo.update({
+        where: { id, userId: session.user.id },
+        data: {
+          status: "COMPLETED",
+          completedAt: new Date(),
+        },
+      });
+
+      // Award points for completing a todo
+      await tx.user.update({
+        where: { id: session.user.id },
+        data: {
+          total_points: {
+            increment: POINTS.COMPLETE_TODO,
+          },
+        },
+      });
+
+      return { todo, session };
     });
+
+    // Update streak
+    await checkAndUpdateDailyStreak(session.user.id);
 
     // If todo has a category and content, create a new Item
     let newItem: { id: string } | null = null;
@@ -261,7 +286,7 @@ export async function completeTodo(
 
     return {
       status: "SUCCESS",
-      data: { todo, item: newItem },
+      data: { todo: result.todo, item: newItem },
     };
   } catch (error) {
     console.error("Error completing todo:", error);
