@@ -14,7 +14,7 @@ export default async function App() {
     );
   }
 
-  const { user, items, stats } = response.data;
+  const { user, items, stats, dailyActivity } = response.data;
 
   // Handle case where there are no learning items
   if (items.length === 0) {
@@ -29,5 +29,5 @@ export default async function App() {
     );
   }
 
-  return <DashboardView user={user} items={items} stats={stats} />;
+  return <DashboardView user={user} items={items} stats={stats} dailyActivity={dailyActivity} />;
 }

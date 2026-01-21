@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import type { Category, Todo, TodoStatus } from "@/generated/prisma/client";
+import { recordDailyActivityPoints } from "@/lib/gamification";
 import prisma from "@/lib/prisma";
 import type { ActionResponse } from "@/types/utils";
 import {
@@ -250,6 +251,9 @@ export async function completeTodo(
           },
         },
       });
+
+      // Record daily activity
+      await recordDailyActivityPoints(tx, session.user.id, POINTS.COMPLETE_TODO);
 
       return { todo, session };
     });

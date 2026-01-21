@@ -2,18 +2,21 @@
 import { Award, BookOpen, Clock, Flame } from "lucide-react";
 import Link from "next/link";
 import LearningList from "@/components/learning/list";
+import { ActivityChart } from "./activity-chart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { Item, User } from "@/generated/prisma/client";
 import type { DashboardStats } from "@/types";
+import type { DailyActivity } from "@/actions/dashboard";
 
 interface Props {
   user: User;
   items: Item[];
   stats: DashboardStats;
+  dailyActivity: DailyActivity[];
 }
 
-const DashboardView = ({ user, items, stats }: Props) => {
+const DashboardView = ({ user, items, stats, dailyActivity }: Props) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-between items-end">
@@ -114,6 +117,9 @@ const DashboardView = ({ user, items, stats }: Props) => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Activity Chart */}
+      <ActivityChart dailyActivity={dailyActivity} />
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

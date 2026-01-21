@@ -5,6 +5,13 @@ import type { Item, User } from "@/generated/prisma/client"; // Ensure these imp
 import prisma from "@/lib/prisma";
 import type { ActionResponse } from "@/types/utils";
 
+// Define a type for daily activity data
+export interface DailyActivity {
+  date: string; // Format: YYYY-MM-DD
+  points: number;
+  itemsCount: number;
+}
+
 // Define a type for the dashboard data
 interface DashboardData {
   user: User;
@@ -16,6 +23,7 @@ interface DashboardData {
     totalLogs: number;
     level: number;
   };
+  dailyActivity: DailyActivity[];
 }
 
 /**
@@ -80,13 +88,37 @@ export async function getDashboardData(): Promise<
       where: { userId: user.id },
     });
 
-    // 6. Calculate various learning statistics based on fetched user and item data.
+    // 6. Fetch daily activity for the last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+    const dailyActivities = await prisma.dailyActivity.findMany({
+      where: {
+        userId: user.id,
+        date: {
+          gte: thirtyDaysAgo,
+        },
+      },
+      orderBy: {
+        date: "asc",
+      },
+    });
+
+    // Format daily activity for the chart
+    const dailyActivity: DailyActivity[] = dailyActivities.map((activity) => ({
+      date: activity.date.toISOString().split("T")[0], // YYYY-MM-DD
+      points: activity.points,
+      itemsCount: activity.itemsCount,
+    }));
+
+    // 7. Calculate various learning statistics based on fetched user and item data.
     const stats = calculateLearningStats(user, items);
 
-    // 7. Return the aggregated dashboard data.
+    // 8. Return the aggregated dashboard data.
     return {
       status: "SUCCESS",
-      data: { user, items, stats },
+      data: { user, items, stats, dailyActivity },
     };
   } catch (error) {
     // 8. Log and return a generic error message if an unexpected error occurs.

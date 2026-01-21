@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import type { Category, Item } from "@/generated/prisma/client";
+import { recordDailyActivityPoints } from "@/lib/gamification";
 import prisma from "@/lib/prisma";
 import type { ActionResponse } from "@/types/utils";
 import {
@@ -144,6 +145,9 @@ export async function addItem(
           },
         },
       });
+
+      // Record daily activity
+      await recordDailyActivityPoints(tx, session.user.id, POINTS.CREATE_ITEM);
 
       return item;
     });

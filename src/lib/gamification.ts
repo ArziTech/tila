@@ -39,19 +39,36 @@ export function calculateItemPoints(difficulty: string): number {
  * Uses a transaction to ensure atomicity
  * @param userId - The user ID to award points to
  * @param points - Number of points to award
+ * @param recordActivity - Whether to record daily activity (default: false)
  */
 export async function awardPoints(
   userId: string,
   points: number,
+  recordActivity: boolean = false,
 ): Promise<void> {
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      total_points: {
-        increment: points,
+  if (recordActivity) {
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          total_points: {
+            increment: points,
+          },
+        },
+      });
+
+      await recordDailyActivityPoints(tx, userId, points);
+    });
+  } else {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        total_points: {
+          increment: points,
+        },
       },
-    },
-  });
+    });
+  }
 }
 
 /**
@@ -348,8 +365,84 @@ export async function awardCompletionRewards(
       },
     });
 
+    // Record daily activity
+    await recordDailyActivity(tx, userId, pointsToAward, 1);
+
     console.log(
       `[Gamification] Awarded ${pointsToAward} points to user ${userId} for completing ${difficulty} item`,
     );
   });
+}
+
+/**
+ * Records daily activity for a user
+ * Updates the DailyActivity record for today, creating it if it doesn't exist
+ * @param tx - Prisma transaction client
+ * @param userId - The user ID
+ * @param points - Points earned today
+ * @param itemsCount - Number of items completed today
+ */
+export async function recordDailyActivity(
+  tx: any,
+  userId: string,
+  points: number,
+  itemsCount: number,
+): Promise<void> {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const existingActivity = await tx.dailyActivity.findUnique({
+    where: {
+      userId_date: {
+        userId,
+        date: today,
+      },
+    },
+  });
+
+  if (existingActivity) {
+    // Update existing record
+    await tx.dailyActivity.update({
+      where: {
+        userId_date: {
+          userId,
+          date: today,
+        },
+      },
+      data: {
+        points: {
+          increment: points,
+        },
+        itemsCount: {
+          increment: itemsCount,
+        },
+      },
+    });
+  } else {
+    // Create new record
+    await tx.dailyActivity.create({
+      data: {
+        userId,
+        date: today,
+        points,
+        itemsCount,
+      },
+    });
+  }
+
+  console.log(`[Gamification] Recorded daily activity for user ${userId}: +${points} points, +${itemsCount} items`);
+}
+
+/**
+ * Records daily activity for creating items or todos (points only, no items count)
+ * @param tx - Prisma transaction client
+ * @param userId - The user ID
+ * @param points - Points earned
+ */
+export async function recordDailyActivityPoints(
+  tx: any,
+  userId: string,
+  points: number,
+): Promise<void> {
+  await recordDailyActivity(tx, userId, points, 0);
 }
