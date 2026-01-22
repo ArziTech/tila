@@ -52,21 +52,21 @@ export function RegisterForm() {
 
   return (
     <div>
-      <p className="text-center text-sm text-gray-600 mb-6">
+      <p className="text-center text-sm text-muted-foreground mb-6">
         Welcome! Join TILA to track your learning journey and gamify your
         knowledge growth.
       </p>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Display Name</FormLabel>
+                <FormLabel className="text-foreground font-medium">Display Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your name" {...field} />
+                  <Input placeholder="Your name" className="rounded-xl h-11" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -77,9 +77,9 @@ export function RegisterForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className="text-foreground font-medium">Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="you@example.com" {...field} />
+                  <Input placeholder="you@example.com" className="rounded-xl h-11" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -90,9 +90,9 @@ export function RegisterForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel className="text-foreground font-medium">Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
+                  <Input type="password" placeholder="••••••••" className="rounded-xl h-11" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -103,9 +103,9 @@ export function RegisterForm() {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
+                <FormLabel className="text-foreground font-medium">Confirm Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
+                  <Input type="password" placeholder="••••••••" className="rounded-xl h-11" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -123,7 +123,7 @@ export function RegisterForm() {
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel>
+                  <FormLabel className="text-foreground">
                     I agree to the terms and conditions
                   </FormLabel>
                 </div>
@@ -131,16 +131,16 @@ export function RegisterForm() {
               </FormItem>
             )}
           />
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="text-indigo-600 hover:text-indigo-500 font-medium">
+            <Link href="/login" className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
               Sign in
             </Link>
           </div>
           <Button
             variant={"gradient"}
             type="submit"
-            className="w-full py-3 mt-2"
+            className="w-full h-11 rounded-2xl font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             disabled={form.formState.isSubmitting}
           >
             {form.formState.isSubmitting && (

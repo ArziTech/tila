@@ -57,20 +57,24 @@ export function LoginForm({ error, verified }: LoginFormProps) {
     <div>
       {verified && <VerificationSuccessBanner />}
 
-      <p className="text-center text-sm text-gray-600 mb-6">
+      <p className="text-center text-sm text-muted-foreground mb-6">
         Welcome back! Sign in to continue your learning journey.
       </p>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className="text-foreground font-medium">Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="you@example.com" {...field} />
+                  <Input
+                    placeholder="you@example.com"
+                    className="rounded-xl h-11"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -81,28 +85,32 @@ export function LoginForm({ error, verified }: LoginFormProps) {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel className="text-foreground font-medium">Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    className="rounded-xl h-11"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          {urlError && <div className="text-red-500">{urlError}</div>}
-          <div className="text-center text-sm text-gray-600">
+          {urlError && <div className="text-destructive text-center font-medium">{urlError}</div>}
+          <div className="text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Link
               href="/register"
-              className="text-indigo-600 hover:text-indigo-500 font-medium"
+              className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold transition-colors"
             >
               Sign up
             </Link>
           </div>
           <Button
-            variant={"gradient"}
             type="submit"
-            className="w-full py-3 mt-2"
+            className="w-full h-11 rounded-2xl font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             disabled={form.formState.isSubmitting}
           >
             {form.formState.isSubmitting && (

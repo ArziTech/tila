@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 type FeatureCardProps = {
   icon: React.ElementType;
@@ -26,14 +27,14 @@ const FeatureCard = ({
   description,
   color,
 }: FeatureCardProps) => (
-  <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+  <div className="bg-card p-6 rounded border border-border shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
     <div
       className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${color}`}
     >
       <Icon size={28} className="text-white" />
     </div>
-    <h3 className="text-xl font-bold text-gray-800 mb-2">{title}</h3>
-    <p className="text-gray-500 leading-relaxed">{description}</p>
+    <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
+    <p className="text-muted-foreground leading-relaxed">{description}</p>
   </div>
 );
 
@@ -42,44 +43,48 @@ export default async function LandingPage() {
   const user = session?.user;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] font-sans text-slate-800 overflow-x-hidden selection:bg-purple-200">
+    <div className="min-h-screen bg-background font-sans text-foreground overflow-x-hidden selection:bg-purple-200 dark:selection:bg-purple-800">
       {/* --- NAVBAR --- */}
-      <nav className="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center relative z-20">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center relative z-20">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-purple-200">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-400 to-pink-400 dark:from-purple-500 dark:to-pink-500 rounded-xl flex items-center justify-center text-white text-lg sm:text-xl font-bold shadow-lg">
             T
           </div>
-          <span className="text-2xl font-extrabold tracking-tight text-gray-900">
+          <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
             TILA
           </span>
         </div>
-        <div className="hidden md:flex items-center gap-8 font-medium text-gray-600">
-          <a href="#features" className="hover:text-purple-600 transition">
+        <div className="hidden md:flex items-center gap-6 sm:gap-8 font-medium text-muted-foreground">
+          <a href="#features" className="hover:text-purple-600 dark:hover:text-purple-400 transition">
             Features
           </a>
-          <a href="#testimonials" className="hover:text-purple-600 transition">
+          <a href="#testimonials" className="hover:text-purple-600 dark:hover:text-purple-400 transition">
             Stories
           </a>
-          <a href="#pricing" className="hover:text-purple-600 transition">
+          <a href="#pricing" className="hover:text-purple-600 dark:hover:text-purple-400 transition">
             Pricing
           </a>
         </div>
-        {user ? (
-          <Button variant={"gradient"} asChild>
-            <Link href="/dashboard">
-              Hi {user.name || "there"}, Go to Dashboard
-            </Link>
-          </Button>
-        ) : (
-          <div className="flex gap-4">
-            <Button variant={"outline"} asChild>
-              <Link href="/login">Sign In</Link>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          {user ? (
+            <Button variant={"default"} className="rounded-2xl" asChild>
+              <Link href="/dashboard">
+                <span className="hidden sm:inline">Hi {user.name || "there"}, Go to Dashboard</span>
+                <span className="sm:hidden">Dashboard</span>
+              </Link>
             </Button>
-            <Button variant={"gradient"} asChild>
-              <Link href="/register">Register</Link>
-            </Button>
-          </div>
-        )}
+          ) : (
+            <div className="flex gap-2 sm:gap-4">
+              <Button variant={"outline"} className="rounded-2xl" asChild>
+                <Link href="/login">Sign In</Link>
+              </Button>
+              <Button variant={"default"} className="rounded-2xl" asChild>
+                <Link href="/register">Register</Link>
+              </Button>
+            </div>
+          )}
+        </div>
       </nav>
 
       {/* --- HERO SECTION --- */}
@@ -102,21 +107,21 @@ export default async function LandingPage() {
               New: AI Study Companion
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-black text-gray-900 leading-[1.1] tracking-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-foreground leading-[1.1] tracking-tight">
               Master Any Skill, <br />
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-600 via-pink-500 to-orange-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 dark:from-purple-400 dark:via-pink-400 dark:to-orange-300">
                 One Day at a Time.
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-gray-500 leading-relaxed max-w-lg mx-auto lg:mx-0">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
               TILA helps you track, organize, and gamify your self-learning
               journey. Turn "I wish I knew" into "I just learned".
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
               <Button
-                className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold text-lg hover:bg-gray-800 hover:scale-105 transition shadow-xl shadow-purple-200 flex items-center gap-2"
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-2xl font-bold text-base sm:text-lg hover:bg-gray-800 dark:hover:bg-white hover:scale-105 transition shadow-xl flex items-center gap-2"
                 asChild
               >
                 <Link href="/login">
@@ -125,7 +130,7 @@ export default async function LandingPage() {
               </Button>
               <button
                 type="button"
-                className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded-2xl font-bold text-lg hover:bg-gray-50 transition flex items-center gap-2"
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-card text-foreground border border-border rounded-2xl font-bold text-base sm:text-lg hover:bg-muted transition flex items-center gap-2"
               >
                 <Layout size={20} /> View Demo
               </button>
@@ -137,7 +142,7 @@ export default async function LandingPage() {
                 {[1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
-                    className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden"
+                    className="w-10 h-10 rounded-full border-2 border-background bg-muted overflow-hidden"
                   >
                     {/* <Image */}
                     {/*   src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`} */}
@@ -149,14 +154,14 @@ export default async function LandingPage() {
                 ))}
               </div>
               <div className="text-sm">
-                <div className="flex text-yellow-400 mb-0.5">
+                <div className="flex text-yellow-400 dark:text-yellow-500 mb-0.5">
                   <Star size={14} fill="currentColor" />
                   <Star size={14} fill="currentColor" />
                   <Star size={14} fill="currentColor" />
                   <Star size={14} fill="currentColor" />
                   <Star size={14} fill="currentColor" />
                 </div>
-                <p className="font-bold text-gray-700">
+                <p className="font-bold text-foreground">
                   Loved by 10,000+ learners
                 </p>
               </div>
@@ -166,14 +171,14 @@ export default async function LandingPage() {
       </section>
 
       {/* --- FEATURES GRID --- */}
-      <section id="features" className="py-24 px-6 bg-white">
+      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 bg-card">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 max-w-2xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
+          <div className="text-center mb-12 sm:mb-16 max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground mb-4">
               Everything You Need to <br />
-              <span className="text-purple-600">Grow Every Day</span>
+              <span className="text-purple-600 dark:text-purple-400">Grow Every Day</span>
             </h2>
-            <p className="text-gray-500 text-lg">
+            <p className="text-muted-foreground text-base sm:text-lg">
               Learning shouldn't be boring. We combine proven productivity
               methods with gamification to keep you addicted to progress.
             </p>
@@ -221,26 +226,26 @@ export default async function LandingPage() {
       </section>
 
       {/* --- FOOTER --- */}
-      <footer className="bg-gray-900 text-white py-12 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+      <footer className="bg-gray-900 dark:bg-slate-950 text-white py-12 border-t border-gray-800 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-white text-black rounded-lg flex items-center justify-center font-bold">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 dark:from-purple-500 dark:to-pink-500 text-white rounded-lg flex items-center justify-center font-bold">
               T
             </div>
             <span className="text-xl font-bold">TILA</span>
           </div>
-          <div className="text-gray-400 text-sm">
+          <div className="text-gray-400 dark:text-gray-500 text-sm">
             © {new Date().getFullYear()} Today I've Learned About. All rights
             reserved.
           </div>
           <div className="flex gap-6">
-            <a href="/" className="text-gray-400 hover:text-white transition">
+            <a href="/" className="text-gray-400 hover:text-white dark:hover:text-gray-200 transition">
               Twitter
             </a>
-            <a href="/" className="text-gray-400 hover:text-white transition">
+            <a href="/" className="text-gray-400 hover:text-white dark:hover:text-gray-200 transition">
               GitHub
             </a>
-            <a href="/" className="text-gray-400 hover:text-white transition">
+            <a href="/" className="text-gray-400 hover:text-white dark:hover:text-gray-200 transition">
               Discord
             </a>
           </div>

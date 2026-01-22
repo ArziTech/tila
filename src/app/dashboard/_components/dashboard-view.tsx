@@ -11,6 +11,7 @@ import { BadgeNotification } from "@/components/badges/badge-notification";
 import { useBadgeChecker } from "@/components/badges/use-badge-checker";
 import type { User } from "@/generated/prisma/client";
 import { getDashboardData } from "@/actions/dashboard";
+import { Sparkles, TrendingUp } from "lucide-react";
 
 interface Props {
   user: User;
@@ -29,11 +30,14 @@ const DashboardView = ({ user }: Props) => {
   if (isLoading) {
     return (
       <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-        <div className="flex justify-between items-end">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">
-              Loading...
-            </h2>
+            <div className="flex items-center gap-3 mb-2">
+              <Sparkles className="w-6 h-6 text-purple-400" />
+              <h2 className="text-3xl md:text-4xl font-extrabold text-foreground">
+                Loading...
+              </h2>
+            </div>
           </div>
         </div>
         <StatsGrid stats={{
@@ -43,10 +47,10 @@ const DashboardView = ({ user }: Props) => {
           totalLogs: 0,
           level: 0,
         }} isLoading={true} />
-        <div className="h-75 bg-gray-100 rounded-lg animate-pulse" />
+        <div className="h-75 bg-muted/30 rounded-md animate-pulse" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="h-100 bg-gray-100 rounded-lg animate-pulse lg:col-span-2" />
-          <div className="h-50 bg-gray-100 rounded-lg animate-pulse" />
+          <div className="h-100 bg-muted/30 rounded-md animate-pulse lg:col-span-2" />
+          <div className="h-50 bg-muted/30 rounded-md animate-pulse" />
         </div>
       </div>
     );
@@ -55,10 +59,15 @@ const DashboardView = ({ user }: Props) => {
   // Handle error state
   if (dashboardResponse?.status === "ERROR" || !dashboardResponse?.data) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-500 text-lg">
-          Error: {dashboardResponse?.error || "Unknown error"}
-        </p>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
+            <span className="text-3xl">⚠️</span>
+          </div>
+          <p className="text-destructive text-lg font-medium">
+            Error: {dashboardResponse?.error || "Unknown error"}
+          </p>
+        </div>
       </div>
     );
   }
@@ -69,23 +78,23 @@ const DashboardView = ({ user }: Props) => {
   if (items.length === 0) {
     return (
       <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-        {/* Badge Banner - Shows recent earned badges */}
         <BadgeBanner />
-
-        {/* Badge Notification - Toast notifications for new badges */}
         <BadgeNotification awardedBadges={[]} totalPointsEarned={0} />
 
-        <div className="flex justify-between items-end">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">
-              Welcome, {user?.username}! 👋
-            </h2>
-            <p className="text-gray-500">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-purple-400" />
+              <h2 className="text-3xl md:text-4xl font-extrabold text-foreground">
+                Welcome, {user?.username}! 👋
+              </h2>
+            </div>
+            <p className="text-muted-foreground text-lg">
               Ready to start your learning journey?
             </p>
           </div>
-          <div className="text-right hidden md:block">
-            <p className="text-sm font-medium text-gray-400">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-medium text-muted-foreground">
               {new Date().toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
@@ -109,23 +118,23 @@ const DashboardView = ({ user }: Props) => {
 
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-      {/* Badge Banner - Shows recent earned badges */}
       <BadgeBanner />
-
-      {/* Badge Notification - Toast notifications for new badges */}
       <BadgeNotification awardedBadges={awardedBadges} totalPointsEarned={totalPointsEarned} />
 
-      <div className="flex justify-between items-end">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            Welcome back, {user?.username}! 👋
-          </h2>
-          <p className="text-gray-500">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <TrendingUp className="w-6 h-6 text-green-400" />
+            <h2 className="text-3xl md:text-4xl font-extrabold text-foreground">
+              Welcome back, {user?.username}! 👋
+            </h2>
+          </div>
+          <p className="text-muted-foreground text-lg">
             You've been consistent! Keep up the good work.
           </p>
         </div>
-        <div className="text-right hidden md:block">
-          <p className="text-sm font-medium text-gray-400">
+        <div className="text-right hidden sm:block">
+          <p className="text-sm font-medium text-muted-foreground">
             {new Date().toLocaleDateString("en-US", {
               weekday: "long",
               year: "numeric",
@@ -148,14 +157,24 @@ const DashboardView = ({ user }: Props) => {
           <LearningList recentOnly limit={5} />
         </div>
         <div>
-          <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 text-primary">
-              Quick Add
+          <div className="bg-card rounded p-6 border border-border shadow-lg hover:shadow-2xl transition-all duration-300">
+            <h3 className="text-xl font-extrabold mb-6 text-foreground">
+              Quick Actions
             </h3>
-            <Button variant="gradient" onClick={() => { }} className="w-full">
-              + Add Learning
+            <Button
+              className="w-full rounded-2xl font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
+              onClick={() => { }}
+              asChild
+            >
+              <Link href="/dashboard/items/new">
+                + Add Learning
+              </Link>
             </Button>
-            <Button variant={"outline"} className="w-full mt-2" asChild>
+            <Button
+              variant="outline"
+              className="w-full mt-3 rounded-2xl font-medium transition-all duration-200"
+              asChild
+            >
               <Link href="/dashboard/items">View All ({items.length})</Link>
             </Button>
           </div>

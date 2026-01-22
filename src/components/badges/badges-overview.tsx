@@ -77,8 +77,8 @@ export function BadgesOverview() {
           {earnedBadges.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <Trophy className="h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-lg font-medium">No badges yet</p>
+                <Trophy className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-lg font-medium text-foreground">No badges yet</p>
                 <p className="text-sm text-muted-foreground">Start learning to earn your first badge!</p>
               </CardContent>
             </Card>

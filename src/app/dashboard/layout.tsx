@@ -20,7 +20,7 @@ export default async function DashboardLayout({
   const usingTestingDomain = isUsingResendTestingDomain();
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-800 font-sans">
+    <div className="flex min-h-screen bg-background text-foreground font-sans">
       <Sidebar />
       <main className="flex-1 overflow-y-auto max-h-screen p-6 md:p-10 relative">
         {usingTestingDomain && verificationRequired && (

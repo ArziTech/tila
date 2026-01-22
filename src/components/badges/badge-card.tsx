@@ -24,8 +24,8 @@ export function BadgeCard({ badge }: BadgeCardProps) {
   return (
     <Card
       className={`
-      transition-all duration-300 hover:scale-105
-      ${earned ? 'border-yellow-500 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950 dark:to-orange-950' : 'border-gray-200 dark:border-gray-700 opacity-75'}
+      transition-all duration-300 hover:scale-105 border-2
+      ${earned ? 'border-yellow-500 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/50 dark:to-orange-950/50' : 'border-border opacity-75'}
     `}
     >
       <CardHeader className="text-center">
@@ -33,9 +33,9 @@ export function BadgeCard({ badge }: BadgeCardProps) {
         <CardTitle className="flex items-center justify-center gap-2">
           {badge.name}
           {earned ? (
-            <Trophy className="w-5 h-5 text-yellow-500" />
+            <Trophy className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
           ) : (
-            <Lock className="w-4 h-4 text-gray-400" />
+            <Lock className="w-4 h-4 text-muted-foreground" />
           )}
         </CardTitle>
         <CardDescription>{badge.description}</CardDescription>

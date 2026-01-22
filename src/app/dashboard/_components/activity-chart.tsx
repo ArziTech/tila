@@ -47,26 +47,26 @@ export function ActivityChart({ dailyActivity }: ActivityChartProps) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">
+        <h3 className="text-lg font-semibold text-foreground">
           Daily Activity
         </h3>
         <div className="flex gap-2">
           <button
             onClick={() => setMetric("points")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               metric === "points"
-                ? "bg-indigo-500 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-indigo-500 text-white shadow-md"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
             Points
           </button>
           <button
             onClick={() => setMetric("itemsCount")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               metric === "itemsCount"
-                ? "bg-indigo-500 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-indigo-500 text-white shadow-md"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
             Learning Items
@@ -74,28 +74,31 @@ export function ActivityChart({ dailyActivity }: ActivityChartProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-card rounded border border-border p-4 sm:p-6 shadow-lg">
         {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                className="stroke-muted opacity-30"
+              />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "#6b7280", fontSize: 12 }}
-                stroke="#9ca3af"
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                stroke="hsl(var(--muted-foreground))"
               />
               <YAxis
-                tick={{ fill: "#6b7280", fontSize: 12 }}
-                stroke="#9ca3af"
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                stroke="hsl(var(--muted-foreground))"
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#1f2937",
-                  borderRadius: "8px",
-                  border: "none",
-                  color: "#fff",
+                  backgroundColor: "hsl(var(--card))",
+                  borderRadius: "12px",
+                  border: "1px solid hsl(var(--border))",
+                  color: "hsl(var(--foreground))",
                 }}
-                labelStyle={{ color: "#fff" }}
+                labelStyle={{ color: "hsl(var(--muted-foreground))" }}
                 formatter={(value: number) => [value, getMetricLabel()]}
                 labelFormatter={(label: string) => {
                   const dataPoint = chartData.find((d) => d.date === label);
@@ -106,14 +109,14 @@ export function ActivityChart({ dailyActivity }: ActivityChartProps) {
                 type="monotone"
                 dataKey={metric === "points" ? "points" : "items"}
                 stroke={getMetricColor()}
-                strokeWidth={2}
+                strokeWidth={3}
                 dot={{ fill: getMetricColor(), strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6 }}
+                activeDot={{ r: 6, strokeWidth: 0 }}
               />
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-[300px] text-gray-500">
+          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
             No activity data available yet. Start learning to see your progress!
           </div>
         )}

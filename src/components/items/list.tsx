@@ -72,15 +72,15 @@ const ItemList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] font-sans text-slate-800 p-6 md:p-10 animate-in fade-in duration-300">
+    <div className="min-h-screen bg-background font-sans text-foreground p-4 sm:p-6 md:p-10 animate-in fade-in duration-300">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div>
-            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-2">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight mb-2">
               My Notes
             </h1>
-            <p className="text-gray-500">
+            <p className="text-muted-foreground text-base sm:text-lg">
               Capture your learning journey, one insight at a time.
             </p>
           </div>
@@ -88,7 +88,7 @@ const ItemList = () => {
           <Button
             variant="gradient"
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2  group"
+            className="flex items-center gap-2 group rounded-2xl"
           >
             <Plus
               size={20}
@@ -99,16 +99,16 @@ const ItemList = () => {
         </div>
 
         {/* Toolbar */}
-        <div className="bg-white p-2 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-2">
+        <div className="bg-card p-2 rounded shadow-lg border border-border flex flex-col md:flex-row gap-2">
           <div className="relative flex-1">
             <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
               size={20}
             />
             <input
               type="text"
               placeholder="Search by title, tag, or keyword..."
-              className="w-full pl-12 pr-4 py-3 bg-transparent rounded-2xl focus:bg-gray-50 outline-none transition-colors"
+              className="w-full pl-12 pr-4 py-3 bg-transparent rounded-md focus:bg-muted/50 outline-none transition-colors text-foreground placeholder:text-muted-foreground"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -119,8 +119,8 @@ const ItemList = () => {
               type="button"
               onClick={() => setSelectedCategory("All")}
               className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${selectedCategory === "All"
-                ? "bg-gray-900 text-white shadow-md"
-                : "text-gray-500 hover:bg-gray-50"
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "text-muted-foreground hover:bg-muted"
                 }`}
             >
               All Notes
@@ -131,8 +131,8 @@ const ItemList = () => {
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${selectedCategory === cat.id
-                  ? "bg-white text-gray-800 shadow-md ring-1 ring-gray-200"
-                  : "text-gray-500 hover:bg-gray-50"
+                  ? "bg-card text-foreground shadow-md ring-1 ring-border"
+                  : "text-muted-foreground hover:bg-muted"
                   }`}
               >
                 <div
@@ -163,13 +163,13 @@ const ItemList = () => {
           </div>
         ) : (
           <div className="text-center py-20 flex flex-col items-center">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6 text-gray-300">
+            <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6 text-muted-foreground/50">
               <BookOpen size={40} />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">
+            <h3 className="text-xl font-bold text-foreground mb-2">
               No notes found
             </h3>
-            <p className="text-gray-500 max-w-sm">
+            <p className="text-muted-foreground max-w-sm">
               Try adjusting filters or create a new note.
             </p>
             <button
@@ -178,7 +178,7 @@ const ItemList = () => {
                 setSearchQuery("");
                 setSelectedCategory("All");
               }}
-              className="mt-6 text-purple-600 font-semibold hover:underline"
+              className="mt-6 text-purple-600 dark:text-purple-400 font-semibold hover:underline"
             >
               Clear filters
             </button>
